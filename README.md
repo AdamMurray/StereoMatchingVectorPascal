@@ -14,7 +14,7 @@ The first step (begun in the file *mastersfirststep.pas*, uploaded on 26/06/13) 
 
 * Read in two image files (in .bmp format) - the left and right images of the stereo pair;
 * Multiply the images together to produce a product image;
-* Apply a correlation function (SSD) to the product image;
+* Apply a correlation function (Sum of Squared Differences (SSD)) to the product image;
 * Convolve the image after correlation;
 * Output the result.
 

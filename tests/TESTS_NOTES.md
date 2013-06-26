@@ -3,7 +3,7 @@ Notes on the Tests
 
 This file contains notes on the tests and problems to be solved with them.
 
-The date of creation of a test should be given in the first line of the beginning section of a particular test (in **bold**).
+The date of creation of a test should be given with that particular test (in **bold**).
 
 Problems should be given with the date (an approx. time) on which the problem was encountered.
 

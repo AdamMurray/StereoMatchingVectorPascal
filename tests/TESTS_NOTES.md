@@ -16,4 +16,4 @@ testImageInputOutput.pas
 
 Problems:
 
-* (*26/06/13*) The colour of the input image is different to that of the input image. In particular, the blue background of the input image becomes a shade of magenta in the output image.
+* (26/06/13) The colour of the input image is different to that of the input image. In particular, the blue background of the input image becomes a shade of magenta in the output image.

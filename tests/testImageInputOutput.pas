@@ -14,20 +14,32 @@ uses bmp;
 
 (*---------- Variable declarations ----------*)
 var
-   imageIn, imageOut : pimage; {pimage is a pointer to an image type, defined in bmp}
+   imageInLocation, imageOutName : string;
+   imageIn, imageOut		 : pimage; {pimage is a pointer to an image type, defined in bmp}
 
 (*---------- Main body of the program ----------*)
 begin
+   writeln('// Test: Input and Output of Full Colour Images');
+   writeln;
+   write('Enter the name (with full path) of the image to be loaded: ');
+   readln(imageInLocation);
+   write('Enter the name of the destination of output image: ');
+   readln(imageOutName);
+   writeln;
+   writeln('<Press enter to initiate test>');
+   readln;
+   
    {load one of the images using the full path}
    {and if successful then proceed}
-   if loadbmpfile('../images/Left1.bmp', imageIn) then
+   if loadbmpfile(imageInLocation, imageIn) then
    begin
       new(imageOut, imageIn ^.maxplane, imageIn ^.maxrow, imageIn ^.maxcol);
 
       imageOut^ := imageIn^;
-      storebmpfile('testImageInputOutput.bmp', imageOut^);
+      storebmpfile(imageOutName, imageOut^);
 
       writeln('If the input and output images match then you''re good!');
    end
    else writeln('Failed to load image file.');
 end.
+(*---------- End of program ----------*)

@@ -10,10 +10,9 @@ Problems should be given with the date (an approx. time) on which the problem wa
 testImageInputOutput.pas
 --------------------------
 
-*Date created: 26/06/13*.
 **Date created: 26/06/13**.
 
-testImageInputOutput.pas tests for correct input and output of the image files to be used in the program. If the test works correctly, the image input to the test and the image output from the test will be exactly equal (including colour).
+*testImageInputOutput.pas* tests for correct input and output of the image files to be used in the program. If the test works correctly, the image input to the test and the image output from the test will be exactly equal (including colour).
 
 Problems:
 

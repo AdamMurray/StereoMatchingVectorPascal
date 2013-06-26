@@ -36,9 +36,16 @@ begin
       new(imageOut, imageIn ^.maxplane, imageIn ^.maxrow, imageIn ^.maxcol);
 
       imageOut^ := imageIn^;
-      storebmpfile(imageOutName, imageOut^);
 
-      writeln('If the input and output images match then you''re good!');
+      if imageIn <> imageOut then
+      begin
+	 writeln('Images do not match');
+      end
+      else
+      begin
+	 writeln('Images match');
+	 storebmpfile(imageOutName, imageOut^);
+      end;
    end
    else writeln('Failed to load image file.');
 end.

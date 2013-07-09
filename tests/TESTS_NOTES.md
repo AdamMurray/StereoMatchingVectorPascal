@@ -26,4 +26,4 @@ This test will only use the *Left1.bmp* and *Right1.bmp* image files contained i
 
 * (09/07/13 14:43) Test produces a grey or blank image on output. There is clearly a problem with the way in which I am using pointers to the various image components.
 * (09/07/13 15:01) Clearly making a pointer to a pimage does not compile, as I have just seen.
-* 
+* 09/07/13 15:15) Referencing the image components in this fashion *imageIn.maxplane*, as opposed to *imageIn ^.maxplane* (as seen in the textbook) compiles; however, the output image is again grey/blank.

@@ -41,7 +41,7 @@ begin
    {and if successful then proceed}
    if loadbmpfile(imageInLocation, imageIn) then
    begin
-      new(imageInTemp, ^imageIn.maxplane, ^imageIn.maxrow, ^imageIn.maxcol);
+      new(imageInTemp, imageIn.maxplane, imageIn.maxrow, imageIn.maxcol);
 
       {if imageInTemp <> imageOutTemp then
       begin

@@ -17,9 +17,9 @@ var
    imageInLocation, imageOutLocation : string;
    imageIn, imageInTemp		     : pimage; {pimage is a pointer to an image type, defined in bmp}
 
-(*---------- Main body of the program ----------*)
+(*---------- Procedures ----------*)
+procedure userInput;
 begin
-   {----- User Input -----}
    writeln('// Test: Input and Output of Full Colour Images');
    writeln;
    write('Enter the name (with full path) of the image to be loaded: ');
@@ -29,13 +29,19 @@ begin
    writeln;
    writeln('<Press enter to initiate test>');
    readln;
+end; { userInput }
+
+(*---------- Main body of the program ----------*)
+begin
+   {----- User Input -----}
+   userInput;
    {----- User Input End -----}
    
    {load one of the images using the full path}
    {and if successful then proceed}
    if loadbmpfile(imageInLocation, imageIn) then
    begin
-      new(imageInTemp, imageIn^.maxplane, imageIn^.maxrow, imageIn^.maxcol);
+      new(imageInTemp, ^imageIn.maxplane, ^imageIn.maxrow, ^imageIn.maxcol);
 
       {if imageInTemp <> imageOutTemp then
       begin

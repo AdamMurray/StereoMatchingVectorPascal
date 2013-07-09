@@ -24,4 +24,6 @@ This test will only use the *Left1.bmp* and *Right1.bmp* image files contained i
 
 **Log**:
 
-* (09/07/13 14:43) Test produces 
+* (09/07/13 14:43) Test produces a grey or blank image on output. There is clearly a problem with the way in which I am using pointers to the various image components.
+* (09/07/13 15:01) Clearly making a pointer to a pimage does not compile, as I have just seen.
+* 

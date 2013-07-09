@@ -41,7 +41,7 @@ begin
    {and if successful then proceed}
    if loadbmpfile(imageInLocation, imageIn) then
    begin
-      new(imageInTemp, imageIn.maxplane, imageIn.maxrow, imageIn.maxcol);
+      new(imageInTemp, imageIn ^.maxplane, imageIn ^.maxrow, imageIn ^.maxcol);
 
       {if imageInTemp <> imageOutTemp then
       begin
@@ -53,7 +53,7 @@ begin
 	 storebmpfile(imageOutLocation, imageOutTemp^);
       end;}
 
-      storebmpfile(imageOutLocation, imageInTemp^);
+      storebmpfile(imageOutLocation, imageIn^);
       
    end
    else writeln('Failed to load image file.');

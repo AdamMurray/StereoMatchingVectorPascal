@@ -15,7 +15,9 @@ uses bmp;
 (*---------- Variable declarations ----------*)
 var
    imageInLocation, imageOutLocation : string;
-   imageIn, imageInTemp		     : pimage; {pimage is a pointer to an image type, defined in bmp}
+   imageInTemp			     : pimage;
+   imageIn			     : pimage; {pimage is a pointer to an image type, defined in bmp} 
+   
 
 (*---------- Procedures ----------*)
 procedure userInput;
@@ -33,15 +35,14 @@ end; { userInput }
 
 (*---------- Main body of the program ----------*)
 begin
-   {----- User Input -----}
+   {user input}
    userInput;
-   {----- User Input End -----}
    
    {load one of the images using the full path}
    {and if successful then proceed}
    if loadbmpfile(imageInLocation, imageIn) then
    begin
-      new(imageInTemp, imageIn ^.maxplane, imageIn ^.maxrow, imageIn ^.maxcol);
+      new(imageIn, imageIn ^.maxplane, imageIn ^.maxrow, imageIn ^.maxcol);
 
       {if imageInTemp <> imageOutTemp then
       begin
@@ -53,7 +54,7 @@ begin
 	 storebmpfile(imageOutLocation, imageOutTemp^);
       end;}
 
-      storebmpfile(imageOutLocation, imageIn^);
+      storebmpfile(imageOutLocation, imageInTemp^);
       
    end
    else writeln('Failed to load image file.');

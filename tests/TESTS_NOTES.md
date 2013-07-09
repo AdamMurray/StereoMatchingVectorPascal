@@ -28,7 +28,10 @@ This test will only use the *Left1.bmp* and *Right1.bmp* image files contained i
 * (09/07/13 15:01) Clearly making a pointer to a pimage does not compile, as I have just seen.
 * (09/07/13 15:15) Referencing the image components in this fashion *imageIn.maxplane*, as opposed to *imageIn ^.maxplane* (as seen in the textbook) compiles; however, the output image is again grey/blank.
 * (09/07/13 15:26) Simply loading in a bmp file (in this case *Right1.bmp*) and storing it without any intermediate storage or modificaton outputs the image with modified colour. The background of *Right1.bmp* is blue but is output as magenta.
+* (09/07/13 15:45) Going to try to further develop the other components of the first step algorithm, leave this specific part to ask Cockshott. It seems that I can read in the files fine but there is that colour problem. Sure I can do most of the other work (if possible) and sort the colour later.
 * 
+
+
 
 
 

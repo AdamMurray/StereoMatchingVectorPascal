@@ -18,10 +18,10 @@ testImageInputOutput.pas
 
 This test will only use the *Left1.bmp* and *Right1.bmp* image files contained in the *images* folder of the project. Output images from this test will have file named following the convention: *date(DD-MM-YY)_(time(HH-MM))_inputImage*.
 
-Problems:
+**Problems**:
 
 * (26/06/13) The colour of the input image is different to that of the input image. In particular, the blue background of the input image becomes a shade of magenta in the output image.
 
-Log:
+**Log**:
 
 * (09/07/13 14:43) Test produces 

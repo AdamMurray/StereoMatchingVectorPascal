@@ -15,14 +15,18 @@ uses bmp;
 (*---------- Variable declarations ----------*)
 var
    imageInLocation, imageOutLocation : string;
-   imageInTemp			     : pimage;
-   imageIn			     : pimage; {pimage is a pointer to an image type, defined in bmp} 
+   ImageInTemp			     : pimage;
+   ImageIn			     : pimage; {pimage is a pointer to an image type, defined in bmp} 
    
-
 (*---------- Procedures ----------*)
+(*
+ *  Procedure to encapsulate user input
+ *)
 procedure userInput;
 begin
-   writeln('// Test: Input and Output of Full Colour Images');
+   writeln('/**********************************************/');
+   writeln('/ Test: Input and Output of Full Colour Images /');
+   writeln('/**********************************************/');
    writeln;
    write('Enter the name (with full path) of the image to be loaded: ');
    readln(imageInLocation);
@@ -40,7 +44,7 @@ begin
    
    {load one of the images using the full path}
    {and if successful then proceed}
-   if loadbmpfile(imageInLocation, imageIn) then
+   if loadbmpfile(imageInLocation, ImageIn) then
    begin
       new(imageIn, imageIn ^.maxplane, imageIn ^.maxrow, imageIn ^.maxcol);
 
@@ -61,4 +65,4 @@ begin
 
    dispose(imageInTemp);
 end.
-(*---------- End of program ----------*)
+(*---------- End of the program ----------*)

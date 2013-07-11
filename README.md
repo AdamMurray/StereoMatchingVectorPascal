@@ -10,7 +10,7 @@ Algorithm Development
 
 The development of the algorithm, and other research which will be conducted, will proceed in a number of steps.
 
-Steps marked with an [X] are those that have been shown to work through testing.
+Steps marked with an [**X**] are those that have been shown to work through testing.
 
 The first step (begun in the file *mastersfirststep.pas*, uploaded on 26/06/13) is as follows:
 

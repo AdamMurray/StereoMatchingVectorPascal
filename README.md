@@ -10,13 +10,15 @@ Algorithm Development
 
 The development of the algorithm, and other research which will be conducted, will proceed in a number of steps.
 
+Steps marked with an [X] are those that have been shown to work through testing.
+
 The first step (begun in the file *mastersfirststep.pas*, uploaded on 26/06/13) is as follows:
 
-* Read in two image files (in .bmp format) - the left and right images of the stereo pair;
-* Multiply the images together to produce a product image;
-* Apply a correlation function (Sum of Squared Differences (SSD)) to the product image;
-* Convolve the image after correlation;
-* Output the result.
+* Read in two image files (in .bmp format) - the left and right images of the stereo pair [X - with colour problem];
+* Multiply the images together to produce a product image [X];
+* Apply a correlation function (Sum of Squared Differences (SSD)) to the product image [ ];
+* Convolve the image after correlation [ ];
+* Output the result [ ].
 
 Testing
 ---------

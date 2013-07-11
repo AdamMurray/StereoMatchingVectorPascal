@@ -29,7 +29,33 @@ This test will only use the *Left1.bmp* and *Right1.bmp* image files contained i
 * (09/07/13 15:15) Referencing the image components in this fashion *imageIn.maxplane*, as opposed to *imageIn ^.maxplane* (as seen in the textbook) compiles; however, the output image is again grey/blank.
 * (09/07/13 15:26) Simply loading in a bmp file (in this case *Right1.bmp*) and storing it without any intermediate storage or modificaton outputs the image with modified colour. The background of *Right1.bmp* is blue but is output as magenta.
 * (09/07/13 15:45) Going to try to further develop the other components of the first step algorithm, leave this specific part to ask Cockshott. It seems that I can read in the files fine but there is that colour problem. Sure I can do most of the other work (if possible) and sort the colour later.
-* 
+* (12/07/13 00:09) I can now solve the reading in issue from what I learned in *testImageMultiplication.pas*. The next step is working out how to preserve the colour of the original image when it is read in.
+*
+
+testImageMultiplication.pas
+-----------------------------
+
+**Date created: 11/07/13**.
+
+*testImageMultiplication.pas* tests that a correct product image is produced when the images *Left1.bmp* and *Right1.bmp* are multiplied together.
+
+A number of small tests on multiplying together arrays of various dimensions are also contained in this test; however, they are just a way of testing my own Vector Pascal knowledge before taking on the main point of the test.
+
+**Problems**:
+
+* (11/07/13) The same colour problem found in the *testImageInputOutput.pas* test is found in this test, as can be seen in the product image produced from muliplying together *Left1.bmp* and *Right1.bmp*.
+
+**Log**:
+
+* (12/07/13 00:05) Test finally works after many various modifications. The output product image is indeed the product of *Left1.bmp* and *Right1.bmp*; however, the colour problem highlighted above is evident.
+*
+
+
+
+
+
+
+
 
 
 

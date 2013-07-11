@@ -13,10 +13,7 @@
  *     > multiplication of simple 1D arrays;
  *     > multiplication of simple 2D arrays;
  *     > multiplication of simple 3D arrays;
- *     > multiplication of images (perhaps
- *       with an intermediate stage of more
- *       complex 3D arrays with numbers similar
- *       to that of images but less rows and columns.
+ *     > multiplication of images.
  *)
 program testImageMultiplication;
 
@@ -34,7 +31,7 @@ type
 
 (*---------- Constant declarations ----------*)
 const
-   {Array Size}
+   {Array Size (used to iterate over arrays)}
    arraySize = 5;
 
 (*---------- Variable declarations ----------*)
@@ -45,10 +42,15 @@ var
    TwoDArrayA, TwoDArrayB, TwoDProductArray : TwoDIntArray;
    {3D arrays}
    ThreeDArrayA, ThreeDArrayB, ThreeDProductArray : ThreeDIntArray;
-   {images}
+   {Images}
    ImageA, ImageB, ProductImage : pimage;
 
 (*---------- Procedures ----------*)
+(*
+ * Procedure to multiply together 1D
+ * arrays to test that the result is
+ * what is expected.
+ *)
 procedure mult1DArrays;
 var
    i : arrayRange;
@@ -66,6 +68,11 @@ begin
    OneDProductArray := OneDArrayA * OneDArrayB;
 end; { mult1DArrays }
 
+(*
+ * Procedure to multiply together 2D
+ * arrays to test that the result is
+ * what is expected.
+ *)
 procedure mult2DArrays;
 var
    i, j	: arrayRange;
@@ -81,6 +88,11 @@ begin
    TwoDProductArray := TwoDArrayA * TwoDArrayB;
 end; { mult2DArrays }
 
+(*
+ * Procedure to multiply together 3D
+ * arrays to test that the result is
+ * what is expected.
+ *)
 procedure mult3DArrays;
 var
    i, j, k : arrayRange;
@@ -96,36 +108,41 @@ begin
    ThreeDProductArray := ThreeDArrayA * ThreeDArrayB;
 end; { mult3DArrays }
 
+(*
+ * Procedure to multiply together images
+ * (3D arrays) to test that the result is
+ * what is expected.
+ *)
 procedure multImages;
 var
+   {Temporary images for ImageA and ImageB}
    ImageATemp, ImageBTemp : pimage;
 begin
-   if loadbmpfile('../images/Left1.bmp', ImageA) and loadbmpfile('../images/Right1.bmp', ImageB) then
+   if loadbmpfile('../images/Left1.bmp', ImageA)
+      and loadbmpfile('../images/Right1.bmp', ImageB) then
    begin
-      writeln('Before new');
-      
+      {Initialise temporary image arrays}
+      writeln('Initialising arrays...');      
       new(ImageATemp, ImageA ^.maxplane, ImageA ^.maxrow, ImageA ^.maxcol);
       new(ImageBTemp, ImageB ^.maxplane, ImageB ^.maxrow, ImageB ^.maxcol);
       new(ProductImage, ImageA ^.maxplane, ImageA ^.maxrow, ImageA ^.maxcol);
 
-      writeln('After new');
-      
+      {Assign temp images to the corresponding image}
       ImageATemp^ := ImageA^;
       ImageBTemp^ := ImageB^;
 
-      writeln('Before product image mult');
-      
+      {Produce product image}
+      writeln('Multiplying together images...');      
       ProductImage^ := ImageATemp^ * ImageBTemp^;
 
-      writeln('Before dispose');
-      
+      {Store the product image}
+      writeln('Storing product image...');
+      storebmpfile('multImagesProductImages.bmp', ProductImage^);
+      writeln('Product image stored.');
+
+      {Dispose of the temporary image buffers}      
       dispose(ImageATemp);
       dispose(ImageBTemp);
-
-      writeln('After dispose');
-
-      storebmpfile('multImagesProductImages2.bmp', ProductImage^);
-
       dispose(ProductImage);
    end
    else
@@ -134,11 +151,13 @@ end;
 
 (*---------- Main body of the program ----------*)
 begin
-   writeln('// Test: Image Multiplication');
+   writeln('/****************************/');
+   writeln('/ Test: Image Multiplication /');
+   writeln('/****************************/');
    writeln;
    
-   {multiply 1D arrays, print all arrays}
-   writeln('// 1D Array Multiplication');
+   {Multiply 1D arrays, print all arrays}
+   writeln('/* 1D Array Multiplication */');
    writeln;
    
    mult1DArrays;
@@ -150,9 +169,9 @@ begin
    write('The contents of the product array are: ');
    write(OneDProductArray:3);
 
-   {multiply 2D arrays, print all arrays}
+   {Multiply 2D arrays, print all arrays}
    writeln;
-   writeln('// 2D Array Multiplication');
+   writeln('/* 2D Array Multiplication */');
 
    mult2DArrays;
    writeln;
@@ -163,9 +182,9 @@ begin
    writeln('The contents of the product array are: ');
    write(TwoDProductArray:2);
 
-   {multiply 3D arrays, print all arrays}
+   {Multiply 3D arrays, print all arrays}
    writeln;
-   writeln('// 3D Array Multiplication');
+   writeln('/* 3D Array Multiplication */');
 
    mult3DArrays;
    writeln;
@@ -176,16 +195,17 @@ begin
    writeln('The contents of the product array are: ');
    write(ThreeDProductArray:2);
 
-   {multiply images, store image}
+   {Multiply images, store image}
    writeln;
-   writeln('// Image Array');
+   writeln('/* Image Multiplication */');
 
    writeln;
    writeln('<Press ENTER to start image multiplication test>');
    readln;
    multImages;
-   writeln('Finished attempting to multiply images...');
 
+   {Dispose of image buffers}
    dispose(ImageA);
    dispose(ImageB);
 end.
+(*---------- End of the program ----------*)

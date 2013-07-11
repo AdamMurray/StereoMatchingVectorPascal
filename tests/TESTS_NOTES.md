@@ -30,6 +30,7 @@ This test will only use the *Left1.bmp* and *Right1.bmp* image files contained i
 * (09/07/13 15:26) Simply loading in a bmp file (in this case *Right1.bmp*) and storing it without any intermediate storage or modificaton outputs the image with modified colour. The background of *Right1.bmp* is blue but is output as magenta.
 * (09/07/13 15:45) Going to try to further develop the other components of the first step algorithm, leave this specific part to ask Cockshott. It seems that I can read in the files fine but there is that colour problem. Sure I can do most of the other work (if possible) and sort the colour later.
 * (12/07/13 00:09) I can now solve the reading in issue from what I learned in *testImageMultiplication.pas*. The next step is working out how to preserve the colour of the original image when it is read in.
+
 *
 
 testImageMultiplication.pas
@@ -48,6 +49,7 @@ A number of small tests on multiplying together arrays of various dimensions are
 **Log**:
 
 * (12/07/13 00:05) Test finally works after many various modifications. The output product image is indeed the product of *Left1.bmp* and *Right1.bmp*; however, the colour problem highlighted above is evident.
+
 *
 
 

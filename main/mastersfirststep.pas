@@ -19,16 +19,18 @@ uses bmp;
 
 
 (*---------- Type declarations ----------*)
-type
-   pint = ^integer;
+{type
+   ;}
 
 
 (*---------- Variable declarations ----------*)
 var
+   {Information for the output product image}
    currentDate, currentTime, productImageLocation : string;
+   {Used to get the images}
    leftImageLocation, rightImageLocation	  : string;
+   {Pointers to the left, right, and product images}
    leftImage, rightImage, productImage		  : pimage;
-   leftImageTemp, rightImageTemp		  : pimage;
 
 
 (*---------- Functions ----------*)
@@ -44,6 +46,9 @@ begin
       and loadbmpfile(rightImageLocation, rightImage) then
    begin
       loadImages := true;
+      
+      {Indicate that the files were read in}
+      writeln('Both image files were successfully read in.');
    end
    else
    begin
@@ -60,9 +65,18 @@ end; { loadimages }
  *)
 procedure userInput;
 begin
-   writeln('// First step for masters algorithm');
-   writeln('// Reads in two images and applies a correlation');
+   writeln('/==================================/');
+   writeln('/ First step for masters algorithm /');
+   writeln('/==================================/');
    writeln;
+   writeln('   > Reads in two image files');
+   writeln('   > Multiplies the images together to form a product image');
+   writeln('   > Applies a correlation function to the product image');
+   writeln('   > Applies a convolution to the resulting image');
+   writeln('   > Outputs the final image');
+   writeln;
+   writeln('<Press ENTER to begin the program>');
+   readln;
    write('Enter the current date (DD-MM-YY): ');
    readln(currentDate);
    write('Enter the current time (HH-MM): ');
@@ -81,47 +95,61 @@ end; { userInput }
  *  from the left and right images
  *)
 procedure generateProductImage;
+var
+   {Temporary variables for left and right images}
+   leftImageTemp, rightImageTemp : pimage;
 begin
-   new(newTestInteger);
+   {Initialise temporary image arrays}
+   writeln('Initialising temporary arrays...');
    new(leftImageTemp, leftImage ^.maxplane, leftImage ^.maxrow, leftImage ^.maxcol);
    new(rightImageTemp, rightImage ^.maxplane, rightImage ^.maxrow, rightImage ^.maxcol);
+   new(productImage, rightImage ^.maxplane, rightImage ^.maxrow, rightImage ^.maxcol);
 
-   writeln('In ''generate product image''');
-   {productImage^ := leftImage^ * rightImage^;}
+   {Assign temp images to their corresponding image}
+   leftImageTemp^ := leftImage^;
+   rightImageTemp^ := rightImage^;
+
+   {Produce product image}
+   writeln('Multiplying left and right images together...');
+   productImage^ := leftImageTemp^ * rightImageTemp^;
+
+   {Store the product image}
+   writeln('Storing product image...');
+   productImageLocation := currentDate + '_(' + currentTime + ')_ProductImage.bmp';
+   storebmpfile(productImageLocation, productImage^);
+   writeln('Product Image stored.');
+
+   {Dispose of the temporary image buffers}
+   dispose(leftImageTemp);
+   dispose(rightImageTemp);
 end; { generateproductimage }
 
 
 (*---------- Main body of program ----------*)
 begin
-   {initial user input}
+   {Generate initial user input}
    userInput;
 
-   {if both images are read in succesfully then...}
+   {If both images are read in succesfully then...}
    if loadImages(leftImageLocation, rightImageLocation) then
-   begin
-      {generate a product image from the two input images}
+   begin      
+      {...generate a product image from the two input images...}
       generateProductImage;
       
-      {store the product image as a bmp file}
+      {...store the product image as a bmp file...}
       productImageLocation := currentDate + '_(' + currentTime + ')_ProductImage.bmp';
       storebmpfile(productImageLocation, productImage^);
-
-      {indicate success}
-      writeln;
-      writeln('Success!');
    end
-   {if either/both of the images fail to be read in...}
+   {Ff either/both of the images fail to be read in...}
    else
    begin
-      {indicate failure}
-      writeln;
-      writeln('Failure!');
+      {...then indicate failure}
+      writeln('**Error: one or both of the images could not be read in or does not exist.**');
    end;
 
+   {Dispose of the remaining image buffers after use}
    dispose(leftImage);
    dispose(rightImage);
    dispose(productImage);
-   dispose(leftImageTemp);
-   dispose(rightImageTemp);
 end.
 (*---------- End of program ----------*)

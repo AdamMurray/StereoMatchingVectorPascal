@@ -86,8 +86,6 @@ begin
    write('Enter the file name (with path) for the right image: ');
    readln(rightImageLocation);
    writeln;
-   writeln('<Press ENTER to initiate program>');
-   readln;
 end; { userInput }
 
 (*
@@ -130,23 +128,30 @@ begin
    {Generate initial user input}
    userInput;
 
+   {Prompt to begin generating product image}
+   writeln('<Press ENTER to generate product image>');
+   readln;
+   
    {If both images are read in succesfully then...}
    if loadImages(leftImageLocation, rightImageLocation) then
    begin      
       {...generate a product image from the two input images...}
       generateProductImage;
       
-      {...store the product image as a bmp file...}
+      {...store the product image as a bmp file}
       productImageLocation := currentDate + '_(' + currentTime + ')_ProductImage.bmp';
       storebmpfile(productImageLocation, productImage^);
    end
-   {Ff either/both of the images fail to be read in...}
+   {If either/both of the images fail to be read in...}
    else
    begin
       {...then indicate failure}
       writeln('**Error: one or both of the images could not be read in or does not exist.**');
    end;
 
+   writeln;
+   writeln('**End of program**');
+   
    {Dispose of the remaining image buffers after use}
    dispose(leftImage);
    dispose(rightImage);

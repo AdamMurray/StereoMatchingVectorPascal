@@ -67,7 +67,7 @@ This test will proceed in the following steps:
 
 **Problems**:
 
-* None so far.
+* (13/07/13 13:22) None so far.
 
 **Log**:
 

@@ -39,7 +39,7 @@ var
  *  Function to load in both images.
  *  Returns boolean -- true if images read in properly, false otherwise
  *)
-function loadImages(limagein, rimagein : string):boolean;
+function loadImages:boolean;
 begin
    {take a string as source and a pimage to load image}
    if loadbmpfile(leftImageLocation, leftImage)
@@ -133,7 +133,7 @@ begin
    readln;
    
    {If both images are read in succesfully then...}
-   if loadImages(leftImageLocation, rightImageLocation) then
+   if loadImages then
    begin      
       {...generate a product image from the two input images...}
       generateProductImage;
@@ -149,6 +149,7 @@ begin
       writeln('**Error: one or both of the images could not be read in or does not exist.**');
    end;
 
+   {Indicate end of the program}
    writeln;
    writeln('**End of program**');
    

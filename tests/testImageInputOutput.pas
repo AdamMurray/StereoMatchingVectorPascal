@@ -24,9 +24,9 @@ var
  *)
 procedure userInput;
 begin
-   writeln('/**********************************************/');
+   writeln('/==============================================/');
    writeln('/ Test: Input and Output of Full Colour Images /');
-   writeln('/**********************************************/');
+   writeln('/==============================================/');
    writeln;
    write('Enter the name (with full path) of the image to be loaded: ');
    readln(imageInLocation);

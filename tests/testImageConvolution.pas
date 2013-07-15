@@ -86,9 +86,21 @@ procedure genconv(var p	: images; var K : matrix);
 	    for m := 1 to K.cols do
 	    begin
 	       r := f^[l,m];
-	       for row := 0 to j-1 do
+	       for row := 0 to j - 1 do
 		  p[n,row] := p[n,row] + r^[n,(row + l - j - 1)];
-	       for row := p.maxrow
+	       for row := j + 1 to p.maxrow do
+		  p[n,row] := p[n,row] + r^[n,(row + l - j - 1)];
+	       for col := 0 to i - 1 do
+		  for row := 0 to p.maxrow do
+		  begin
+		     p[n,row,col] := r^[n,row,(col + 1 + m - i)] + p[n,row,col];
+		  end;
+	       for col := 1 + p.maxcol - i to p.maxcol do
+		  for row := 0 to p.maxrow do
+		  begin
+		     p[n,row,col] := p[n,row,col] + r^[n];
+		  end;
+	       {$r+}
 	    end;
    end; { doedges }
 
@@ -104,14 +116,45 @@ procedure genconv(var p	: images; var K : matrix);
    end; { freestore }
 
 begin
+   {Create space for f on the heap, initialising
+   its size with the rows and columns of the
+   convolution matrix}
    new(f, K.rows, K.cols);
+   {Initialise the elements of the array
+   pointed at by f to be initially nil}
    f^ := nil;
+
+   {Create space for flags on the heap, initialising
+   its size with the rows and columns of the
+   convolution matrix}
    new(flags, K.rows, K.cols);
+   {Initialise the elements of the array
+   pointed at by flags to be initially false}
    flags^ := false;
 
+   {Iterate over the rows and columns of f, and set
+   each element to the value found by calling the
+   premultiplication function (pm)}
    for i := 1 to K.rows do
       for j := 1 to K.cols do
-      else f^[i, j] := pm(i, j);
-   
+	 f^[i, j] := pm(i, j);
+
+   {Initialise a and b which store the steps
+   away from the centre of the kernel}
+   a := (K.rows)/2;
+   b := (K.cols)/2;
+   {Initialise the rows and columns of the image p
+   which do not require edge handling to zero}
+   p[][a..p.maxrow - a, b..p.maxcol - b] := 0;
+
+   {Iterate over the rows and columns of the kernel}
+   for i := 1 to K.rows do
+      for j := 1 to K.cols do
+	 p[][a..p.maxrow - a, b..p.maxcol - b] :=
+	 p[][a..p.maxrow - a, b..p.maxcol - b] + f^[i,j] ^[iota 0, i + iota 1 - a, j + iota 2 - b];
+
+   doedges;
+
+   freestore;
 end; { genconv }
  

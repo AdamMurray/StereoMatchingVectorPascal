@@ -15,23 +15,24 @@ uses bmp;
 (*---------- Global type declarations ----------*)
 type
    {Array type to store premultiplication values}
-   premult(rows,cols:integer) = array[1..rows, 1..cols] of pimage;
-   {Array type to... }
-   tflag(rows,cols:integer)   = array[1..rows, 1..cols] of boolean;
+   preMultiplicationArray(rows,cols:integer) = array[1..rows, 1..cols] of pimage;
+   {Array type in which the element [i,j] is true if element [i,j] of the
+   premultiplication array holds the first pointer to a premultiplied image}
+   flagsArray(rows,cols:integer)   = array[1..rows, 1..cols] of boolean;
 
 (*---------- Global variable declarations ----------*)
 var
-   {Input image}
+   {Input image and temporary storage for input image}
    imageIn, imageInTemp : pimage;
-   {Kernel}
-   Kernel : ^matrix;
-   {For kernel iteration}
+   {Kernel/Convolution matrix}
+   kernel : ^matrix;
+   {Parameters for iterating over the kernel}
    ki, kj : integer;
    {A pointer to the premultiplication array}
-   f	      : ^premult;
+   preMultPointer	      : ^preMultiplicationArray;
    a, b, i, j : integer;
    {A pointer to the flags array}
-   flags      : ^tflag;
+   flagsArrayPointer      : ^flagsArray;
 
 (*---------- Procedures ----------*)
 (* Procedure to apply a convolution to an image.
@@ -40,10 +41,10 @@ var
  * Params: p -- image
  *         K -- convolution matrix/kernel
  *)
-procedure genconv(var p	: image; var K : matrix);
+procedure applyConvolution(var p : image; var K : matrix);
 
    (* Function that checks for duplicate kernel elements *)
-   function dup(i, j : integer):boolean;
+   function duplicateKernalElemCheck(i, j : integer):boolean;
    var
       c, d, l, m : integer;
       b		 : boolean;
@@ -54,14 +55,14 @@ procedure genconv(var p	: image; var K : matrix);
       d := j + i * c;
       b := false;
       for l := 1 to c do
-	 for m := 1 to K.rows do {uncertain if upper or lower case K/k here}
+	 for m := 1 to K.rows do
 	    b := b or (K[i, j] = K[m, l]) and (m + c * l < d);
-      dup := b;
-      {dup:=\or\or((K[i,j]=K)and(iota 1+c*iota 0<d));}
-   end; { dup }
+      duplicateKernalElemCheck := b;
+      {duplicateKernalElemCheck:=\or\or((K[i,j]=K)and(iota 1+c*iota 0<d));}
+   end; { duplicateKernalElemCheck }
 
    (* Function to find a previous instance of a kernel element *)
-   function prev(i, j : integer):pimage;
+   function prevKernelElemCheck(i, j : integer):pimage;
    var
       m, n : integer;
       s	   : real;
@@ -70,14 +71,14 @@ procedure genconv(var p	: image; var K : matrix);
       for m := 1 to i - 1 do
 	 for n := 1 to K.cols do
 	    if K[m,n] = s then
-	       prev := f^[m,n];
+	       prevKernelElemCheck := preMultPointer^[m,n];
       for n := 1 to j - 1 do
 	 if K[i,n] = s then
-	    prev := f^[i,n];
-   end; { prev }
+	    prevKernelElemCheck := preMultPointer^[i,n];
+   end; { prevKernelElemCheck }
 
    (* Function to handle premultiplication *)
-   function pm(i, j : integer):pimage;
+   function preMultiplication(i, j : integer):pimage;
    var
       x	: pimage;
    begin
@@ -85,25 +86,29 @@ procedure genconv(var p	: image; var K : matrix);
       its size with the number of planes, rows, and
       columns of the input image p}
       new(x, p.maxplane, p.maxrow, p.maxcol);
-      {Adjusts the contrast of image p by a factor given
-      by the kernel K and stores the result in x}
+      
+      {Adjust the contrast of image p by a factor given
+      by the kernel K and store the result in x}
       adjustcontrast(K[i,j], p, x^);
-      {Sets the value of the flags array to true}
-      flags^[i,j] := true;
-      {Returns x}
-      pm := x;
-   end; { pm }
+      
+      {Set the value of the flags array to true}
+      flagsArrayPointer^[i,j] := true;
+      
+      {Return x}
+      preMultiplication := x;
+   end; { preMultiplication }
 
    (* Procedure to handle edge processing *)
-   procedure doedges;
+   procedure handleEdges;
    var
-      i,j,l,m,n,row,col	: integer;
-      r			: pimage;
+      i, j, l, m, n, row, col : integer;
+      r			      : pimage;
    begin
       {Set j to half the number of rows in the kernel}
       j := (K.rows) div 2;
       {Set i to half the number of columns in the kernel}
       i := (K.cols) div 2;
+      
       {Initialise the edge rows and columns of p based
       on the size of the kernel, as these will be the
       focus of edge handling}
@@ -115,7 +120,7 @@ procedure genconv(var p	: image; var K : matrix);
 	 for l := 1 to K.rows do
 	    for m := 1 to K.cols do
 	    begin
-	       r := f^[l,m];
+	       r := preMultPointer^[l,m];
 	       for row := 0 to j - 1 do
 		  p[n,row] := p[n,row] + r^[n,(row + l - j - 1)];
 	       for row := j + 1 to p.maxrow do
@@ -132,7 +137,7 @@ procedure genconv(var p	: image; var K : matrix);
 		  end;
 	       {$r+}
 	    end;
-   end; { doedges }
+   end; { handleEdges }
 
    (* Function to handle the release of temporary store *)
    procedure freestore;
@@ -141,33 +146,33 @@ procedure genconv(var p	: image; var K : matrix);
    begin
       for i := 1 to K.rows do
 	 for j := 1 to K.cols do
-	    if flags^[i,j]
-	       then dispose(f^[i,j]);
+	    if flagsArrayPointer^[i,j]
+	       then dispose(preMultPointer^[i,j]);
    end; { freestore }
 
 begin
    {Create space for f on the heap, initialising
    its size with the rows and columns of the
    convolution matrix}
-   new(f, K.rows, K.cols);
+   new(preMultPointer, K.rows, K.cols);
    {Initialise the elements of the array
    pointed at by f to be initially nil}
-   f^ := nil;
+   preMultPointer^ := nil;
 
    {Create space for flags on the heap, initialising
    its size with the rows and columns of the
    convolution matrix}
-   new(flags, K.rows, K.cols);
+   new(flagsArrayPointer, K.rows, K.cols);
    {Initialise the elements of the array
    pointed at by flags to be initially false}
-   flags^ := false;
+   flagsArrayPointer^ := false;
 
    {Iterate over the rows and columns of f, and set
    each element to the value found by calling the
-   premultiplication function (pm)}
+   premultiplication function (preMultiplication)}
    for i := 1 to K.rows do
       for j := 1 to K.cols do
-	 f^[i, j] := pm(i, j);
+	 preMultPointer^[i, j] := preMultiplication(i, j);
 
    {Initialise a and b which store the steps
    away from the centre of the kernel}
@@ -181,14 +186,14 @@ begin
    for i := 1 to K.rows do
       for j := 1 to K.cols do
 	 p[][a..p.maxrow - a, b..p.maxcol - b] :=
-	 p[][a..p.maxrow - a, b..p.maxcol - b] + f^[i,j] ^[iota 0, i + iota 1 - a, j + iota 2 - b];
+	 p[][a..p.maxrow - a, b..p.maxcol - b] + preMultPointer^[i,j] ^[iota 0, i + iota 1 - a, j + iota 2 - b];
 
    {Handles edge processing}
-   doedges;
+   handleEdges;
 
    {Handles the release of temporary storage}
    freestore;
-end; { genconv }
+end; { applyConvolution }
 
 (*---------- Main body of the program ---------- *)
 begin
@@ -214,13 +219,13 @@ begin
 	 for kj := 0 to 2 do
 	 begin
 	    write('Input the value of the kernel at position [' + ki + ',' + kj + ']: ');
-	    readln(Kernel^[ki,kj]);
+	    readln(kernel^[ki,kj]);
 	 end;
       writeln('Kernel initialised.');
       
       {Apply general convolution}
       writeln('Applying convolution...');
-      genconv(imageInTemp^,  Kernel^);
+      applyConvolution(imageInTemp^,  kernel^);
       writeln('Convolution applied.');
 
       {Store the convolved image}

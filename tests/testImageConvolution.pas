@@ -14,7 +14,7 @@ uses bmp;
 
 (*---------- Global constant declarations ----------*)
 const
-   kernelBounds	= 3;
+   kernelBounds	= 4;
 
 (*---------- Global type declarations ----------*)
 type
@@ -200,6 +200,7 @@ begin
    {Handles the release of temporary storage}
    freeStorage;
 end; { applyConvolution }
+
 
 (*---------- Main body of the program ---------- *)
 begin

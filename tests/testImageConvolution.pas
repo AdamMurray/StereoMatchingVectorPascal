@@ -218,14 +218,18 @@ begin
       imageInTemp^ := imageIn^;
       writeln('Temporary image initialised.');
 
+      {Create space for the kernel on the heap}
+      new(kernel);
+
       {Initialise the kernel}
       writeln('Attempting to initialise the kernel...');
-      for ki := 0 to 2 do
+      {for ki := 0 to 2 do
 	 for kj := 0 to 2 do
 	 begin
 	    write('Input the value of the kernel at position [' + ki + ',' + kj + ']: ');
 	    readln(kernel^[ki,kj]);
-	 end;
+	 end;}
+      kernel^ := -1;
       writeln('Kernel initialised.');
       
       {Apply general convolution}

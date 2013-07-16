@@ -79,6 +79,7 @@ This test will proceed in the following steps:
 
 * (16/07/13 23:19) Another problem which is not currently understood, and could be an error on my part, is that the code seemed to produce a Seg fault at two different places in the code without the code having been changed in between running it. There was a segmentation fault in assigning the temporary copy of the input image with data from the input image itself, the code was then re-compiler (without any changes as far as I recall) and the seg fault arose in a different place, just before assignment should be made to the kernel. Currently, after multiple re-compilation of the same code, the seg fault continually arises at the point of kernel assignment.
 
+* (16/07/13 23:19) I'm a complete idiot. The seg fault at kernel initialisation is because I didn't create space for the kernel on the heap. Now working out how to set the bounds of the kernel within the **new(...)** statement.
 
 
 

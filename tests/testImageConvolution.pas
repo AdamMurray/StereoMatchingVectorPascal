@@ -139,36 +139,38 @@ procedure applyConvolution(var p : image; var K : matrix);
 	    end;
    end; { handleEdges }
 
-   (* Function to handle the release of temporary store *)
-   procedure freestore;
+   (* Procedure to handle the release of temporary store *)
+   procedure freeStorage;
    var
-      i,j : integer;
+      i, j : integer;
    begin
       for i := 1 to K.rows do
 	 for j := 1 to K.cols do
+	    {if there exists a pointer to a premultiplied
+	    image then dispose of that pointer}
 	    if flagsArrayPointer^[i,j]
 	       then dispose(preMultPointer^[i,j]);
-   end; { freestore }
+   end; { freeStorage }
 
 begin
-   {Create space for f on the heap, initialising
-   its size with the rows and columns of the
+   {Create space for premultiplicationarray on the heap,
+   initialising its size with the rows and columns of the
    convolution matrix}
    new(preMultPointer, K.rows, K.cols);
-   {Initialise the elements of the array
-   pointed at by f to be initially nil}
+   {Initialise the elements of the premultiplication
+   array to be initially nil}
    preMultPointer^ := nil;
 
-   {Create space for flags on the heap, initialising
+   {Create space for flags array on the heap, initialising
    its size with the rows and columns of the
    convolution matrix}
    new(flagsArrayPointer, K.rows, K.cols);
-   {Initialise the elements of the array
-   pointed at by flags to be initially false}
+   {Initialise the elements of the
+   flags array to be initially false}
    flagsArrayPointer^ := false;
 
-   {Iterate over the rows and columns of f, and set
-   each element to the value found by calling the
+   {Iterate over the rows and columns of the premultiplication array,
+   and set each element to the value found by calling the
    premultiplication function (preMultiplication)}
    for i := 1 to K.rows do
       for j := 1 to K.cols do
@@ -192,7 +194,7 @@ begin
    handleEdges;
 
    {Handles the release of temporary storage}
-   freestore;
+   freeStorage;
 end; { applyConvolution }
 
 (*---------- Main body of the program ---------- *)

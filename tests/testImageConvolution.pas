@@ -12,6 +12,10 @@ program testImageConvolution;
 (*---------- Uses declarations ----------*)
 uses bmp;
 
+(*---------- Global constant declarations ----------*)
+const
+   kernelBounds	= 3;
+
 (*---------- Global type declarations ----------*)
 type
    {Array type to store premultiplication values}
@@ -219,7 +223,7 @@ begin
       writeln('Temporary image initialised.');
 
       {Create space for the kernel on the heap}
-      new(kernel);
+      new(kernel, kernelBounds, kernelBounds);
 
       {Initialise the kernel}
       writeln('Attempting to initialise the kernel...');

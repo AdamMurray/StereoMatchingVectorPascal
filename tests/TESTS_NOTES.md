@@ -81,7 +81,7 @@ This test will proceed in the following steps:
 
 * (16/07/13 00:22) I'm a complete idiot. The seg fault at kernel initialisation is because I didn't create space for the kernel on the heap. Now working out how to set the bounds of the kernel within the **new(...)** statement.
 
-* (16/07/13 00:35) Sorted out how to apply bounds to the kernel while creating space for it on the heap. Not all together sure if the bounds are correct, but need to experiment a bit. Currently getting a runtime error while the convolution is being applied: **Line    129 error    201 array or subrange bounds error**
+* (16/07/13 00:35) Sorted out how to apply bounds to the kernel while creating space for it on the heap. Not altogether sure if the bounds are correct, but need to experiment a bit. Currently getting a runtime error while the convolution is being applied: **Line    129 error    201 array or subrange bounds error**
 
 
 

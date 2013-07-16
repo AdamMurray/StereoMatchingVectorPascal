@@ -14,17 +14,33 @@ uses bmp;
 
 (*---------- Global type declarations ----------*)
 type
+   {Array type to store premultiplication values}
    premult(rows,cols:integer) = array[1..rows, 1..cols] of pimage;
-   tflag(rows,cols:integer)    =  array[1..rows, 1..cols] of boolean;
+   {Array type to... }
+   tflag(rows,cols:integer)   = array[1..rows, 1..cols] of boolean;
 
 (*---------- Global variable declarations ----------*)
 var
+   {Input image}
+   imageIn, imageInTemp : pimage;
+   {Kernel}
+   Kernel : ^matrix;
+   {For kernel iteration}
+   ki, kj : integer;
+   {A pointer to the premultiplication array}
    f	      : ^premult;
    a, b, i, j : integer;
+   {A pointer to the flags array}
    flags      : ^tflag;
 
 (*---------- Procedures ----------*)
-procedure genconv(var p	: images; var K : matrix);
+(* Procedure to apply a convolution to an image.
+ * The convolution matrix can be of any general form.
+ *
+ * Params: p -- image
+ *         K -- convolution matrix/kernel
+ *)
+procedure genconv(var p	: image; var K : matrix);
 
    (* Function that checks for duplicate kernel elements *)
    function dup(i, j : integer):boolean;
@@ -32,7 +48,9 @@ procedure genconv(var p	: images; var K : matrix);
       c, d, l, m : integer;
       b		 : boolean;
    begin
+      {Set c to the number of columns}
       c := K.cols;
+      
       d := j + i * c;
       b := false;
       for l := 1 to c do
@@ -43,7 +61,7 @@ procedure genconv(var p	: images; var K : matrix);
    end; { dup }
 
    (* Function to find a previous instance of a kernel element *)
-   function prev(i, j : integer)pimage;
+   function prev(i, j : integer):pimage;
    var
       m, n : integer;
       s	   : real;
@@ -63,9 +81,16 @@ procedure genconv(var p	: images; var K : matrix);
    var
       x	: pimage;
    begin
+      {Create space for x on the heap, initialising
+      its size with the number of planes, rows, and
+      columns of the input image p}
       new(x, p.maxplane, p.maxrow, p.maxcol);
+      {Adjusts the contrast of image p by a factor given
+      by the kernel K and stores the result in x}
       adjustcontrast(K[i,j], p, x^);
+      {Sets the value of the flags array to true}
       flags^[i,j] := true;
+      {Returns x}
       pm := x;
    end; { pm }
 
@@ -75,8 +100,13 @@ procedure genconv(var p	: images; var K : matrix);
       i,j,l,m,n,row,col	: integer;
       r			: pimage;
    begin
-      j := K.rows/2;
-      i := K.cols/2;
+      {Set j to half the number of rows in the kernel}
+      j := (K.rows) div 2;
+      {Set i to half the number of columns in the kernel}
+      i := (K.cols) div 2;
+      {Initialise the edge rows and columns of p based
+      on the size of the kernel, as these will be the
+      focus of edge handling}
       p[][0..j-1] := 0;
       p[][][0..i-1] := 0;
       p[][1 + p.maxrow - j..p.maxrow] := 0;
@@ -98,7 +128,7 @@ procedure genconv(var p	: images; var K : matrix);
 	       for col := 1 + p.maxcol - i to p.maxcol do
 		  for row := 0 to p.maxrow do
 		  begin
-		     p[n,row,col] := p[n,row,col] + r^[n];
+		     p[n,row,col] := p[n,row,col]{ +  r^[n]};
 		  end;
 	       {$r+}
 	    end;
@@ -141,8 +171,8 @@ begin
 
    {Initialise a and b which store the steps
    away from the centre of the kernel}
-   a := (K.rows)/2;
-   b := (K.cols)/2;
+   a := (K.rows) div 2;
+   b := (K.cols) div 2;
    {Initialise the rows and columns of the image p
    which do not require edge handling to zero}
    p[][a..p.maxrow - a, b..p.maxcol - b] := 0;
@@ -153,8 +183,56 @@ begin
 	 p[][a..p.maxrow - a, b..p.maxcol - b] :=
 	 p[][a..p.maxrow - a, b..p.maxcol - b] + f^[i,j] ^[iota 0, i + iota 1 - a, j + iota 2 - b];
 
+   {Handles edge processing}
    doedges;
 
+   {Handles the release of temporary storage}
    freestore;
 end; { genconv }
- 
+
+(*---------- Main body of the program ---------- *)
+begin
+   writeln('/=========================/');
+   writeln('/ Test: Image Convolution /');
+   writeln('/=========================/');
+   writeln;
+
+   {Read in image}
+   if loadbmpfile('../images/Left1.bmp', imageIn) then
+   begin
+      writeln('Creating space for temporary image...');
+      new(imageInTemp, imageIn ^.maxplane, imageIn ^.maxrow, imageIn ^.maxcol);
+
+      {Assign temp image to the corresponding input image}
+      writeln('Initialising temp image...');
+      imageInTemp^ := imageIn^;
+      writeln('Temp image initialised.');
+
+      {Initialise the kernel}
+      writeln('Initilising the kernel...');
+      for ki := 0 to 2 do
+	 for kj := 0 to 2 do
+	 begin
+	    write('Input the value of the kernel at position [' + ki + ',' + kj + ']: ');
+	    readln(Kernel^[ki,kj]);
+	 end;
+      writeln('Kernel initialised.');
+      
+      {Apply general convolution}
+      writeln('Applying convolution...');
+      genconv(imageInTemp^,  Kernel^);
+      writeln('Convolution applied.');
+
+      {Store the convolved image}
+      writeln('Storing image...');
+      storebmpfile('convolvedImage.bmp', imageInTemp^);
+      writeln('Image stored.');
+
+      {Dispose of temporary storage}
+      writeln('Disposing of temporary storage...');
+      dispose(imageIn);
+      dispose(imageInTemp);
+      writeln('Temporary storage disposed.');
+   end;
+end.
+(*---------- End of program ---------*)

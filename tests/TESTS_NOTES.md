@@ -73,6 +73,10 @@ This test will proceed in the following steps:
 
 * (13/07/13 13:22) *testImageConvolution.pas* initially created.
 
+* (16/07/13 17:02) Using the *genconv* procedure from *SIMD Programming Manual* as a basis for the convolution. So far there are a few bugs, partly due to what seem to be typos in the book, and partly due to things I haven't figured out yet. One line in particular (from the doedges procedure) is a head-scratcher: **p[n,row,col] := p[n,row,col] +  r^[n];**. This line throws up a compiler error to do with incompatible array rank. Still to figure out why this doesn't work. For the meantime, the **+ r^[n] part has been commented out.
+
+* (16/07/13 23:19) Another problem which is not currently understood, and could be an error on my part, is that the code seemed to produce a Seg fault at two different places in the code without the code having been changed in between running it. There was a segmentation fault in assigning the temporary copy of the input image with data from the input image itself, the code was then re-compiler (without any changes as far as I recall) and the seg fault arose in a different place, just before assignment should be made to the kernel. Currently, after multiple re-compilation of the same code, the seg fault continually arises at the point of kernel assignment.
+
 
 
 

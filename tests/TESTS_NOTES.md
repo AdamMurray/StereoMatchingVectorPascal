@@ -59,7 +59,7 @@ testImageConvolution.pas
 
 This test will proceed in the following steps:
 
-* Devise a way to apply a very simple convolution matrix to a reasonably small array of.
+* Devise a way to apply a very simple convolution matrix to a reasonably small array.
 
 * Extend this application of a simple convultion matrix to work on images, specifically the product image generated in *testImageMultiplication.pas*.
 

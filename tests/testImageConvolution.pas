@@ -14,7 +14,7 @@ uses bmp;
 
 (*---------- Global constant declarations ----------*)
 const
-   kernelBounds	= 4;
+   kernelBounds	= 7;
 
 (*---------- Global type declarations ----------*)
 type

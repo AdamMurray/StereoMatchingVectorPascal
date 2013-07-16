@@ -85,7 +85,9 @@ This test will proceed in the following steps:
 
 * (16/07/13 00:35) Sorted out how to apply bounds to the kernel while creating space for it on the heap. Not altogether sure if the bounds are correct, but need to experiment a bit. Currently getting a runtime error while the convolution is being applied: **Line    129 error    201 array or subrange bounds error**
 
-* (16/07/13 00:48) When the *kernelBounds* constant that instantiates the size of the kernel as it is created on the heap is changed from 3 to 4, the error described in the above log entry moves from like 129 to line 195: **p[][a..p.maxrow - a, b..p.maxcol - b] + preMultPointer^[i,j] ^[iota 0, i + iota 1 - a, j + iota 2 - b];**. And when the bounds are changed to 5 a seg fault occurs.
+* (16/07/13 00:48) When the *kernelBounds* constant that instantiates the size of the kernel as it is created on the heap is changed from 3 to 4, the error described in the above log entry moves from like 129 to line 195: **p[][a..p.maxrow - a, b..p.maxcol - b] + preMultPointer^[i,j] ^[iota 0, i + iota 1 - a, j + iota 2 - b];**. And when the bounds are changed to 5 a seg fault occurs. Bounds of 1 give rise to the line 195 error. Bounds of 2 give rise to the line 129 error.
+
+* (16/07/13 00:55) Any kernel bounds above 4 seem to give rise to a seg fault (only tested with 5, 6, 7 but seems that it will continue to be the case).
 
 
 

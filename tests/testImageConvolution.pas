@@ -205,18 +205,21 @@ begin
    writeln;
 
    {Read in image}
+   writeln('Attempting to read in image to be convolved...');
    if loadbmpfile('../images/Left1.bmp', imageIn) then
    begin
-      writeln('Creating space for temporary image...');
+      writeln('Image read in successfully.');
+      writeln('Attempting to create space for image...');
       new(imageInTemp, imageIn ^.maxplane, imageIn ^.maxrow, imageIn ^.maxcol);
+      writeln('Space for image created. Seg fault avoidance achieved.');
 
       {Assign temp image to the corresponding input image}
-      writeln('Initialising temp image...');
+      writeln('Attempting to initialise temporary image with input image data...');
       imageInTemp^ := imageIn^;
-      writeln('Temp image initialised.');
+      writeln('Temporary image initialised.');
 
       {Initialise the kernel}
-      writeln('Initilising the kernel...');
+      writeln('Attempting to initialise the kernel...');
       for ki := 0 to 2 do
 	 for kj := 0 to 2 do
 	 begin
@@ -226,12 +229,12 @@ begin
       writeln('Kernel initialised.');
       
       {Apply general convolution}
-      writeln('Applying convolution...');
+      writeln('Attempting to apply convolution...');
       applyConvolution(imageInTemp^,  kernel^);
       writeln('Convolution applied.');
 
       {Store the convolved image}
-      writeln('Storing image...');
+      writeln('Attempting to store image...');
       storebmpfile('convolvedImage.bmp', imageInTemp^);
       writeln('Image stored.');
 
@@ -240,6 +243,8 @@ begin
       dispose(imageIn);
       dispose(imageInTemp);
       writeln('Temporary storage disposed.');
-   end;
+   end
+   else
+      writeln('ERROR: Image could not be read in or does not exist.');
 end.
 (*---------- End of program ---------*)

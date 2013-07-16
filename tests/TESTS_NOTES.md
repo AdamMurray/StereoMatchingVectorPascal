@@ -71,6 +71,8 @@ This test will proceed in the following steps:
 
 * (16/07/13 23:26) Seg faults everywhere. Currently need to handle problems with assigning values to the kernel and trying to stop a seg fault at the point at which the kernel assignment is made. There are also some small problems in the code such as the **p[n,row,col] := p[n,row,col] +  r^[n];** noted in the log. According to the compiler output, r^[n] should have rank 0 in the context but has rank 2, although it seems to me that to add those two arrays together the rank of r^[n] should be 2 or 3.
 
+* (16/07/13 00:35) Seg fault problems solved so far. Now have some more issues as mentioned in the log.
+
 **Log**:
 
 * (13/07/13 13:22) *testImageConvolution.pas* initially created.

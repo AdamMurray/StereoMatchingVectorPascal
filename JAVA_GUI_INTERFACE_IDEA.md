@@ -1,5 +1,5 @@
-Idea for a GUI Written in Java to Interface with the Algorithm
-================================================================
+Idea for a GUI Written in Java to Interface with the Algorithm Source Code
+===========================================================================
 
 **Date created: 17/07/13**.
 

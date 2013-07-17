@@ -12,7 +12,7 @@ program testImageMultiplication;
 (*---------- Uses declarations ----------*)
 uses bmp;
 
-(*---------- Variable declarations ----------*)
+(*---------- Gloval variable declarations ----------*)
 var
    {Images}
    ImageA, ImageB, ProductImage : pimage;

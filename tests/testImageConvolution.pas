@@ -14,7 +14,7 @@ uses bmp;
 
 (*---------- Global constant declarations ----------*)
 const
-   kernelBounds	= 7;
+   kernelBounds	= 3;
 
 (*---------- Global type declarations ----------*)
 type
@@ -126,9 +126,9 @@ procedure applyConvolution(var p : image; var K : matrix);
 	    begin
 	       r := preMultPointer^[l,m];
 	       for row := 0 to j - 1 do
-		  p[n,row] := p[n,row] + r^[n,(row + l - j - 1)];
+		  p[n,row] := p[n,row] + r^[n,(row + l - j{- 1})];
 	       for row := j + 1 to p.maxrow do
-		  p[n,row] := p[n,row] + r^[n,(row + l - j - 1)];
+		  p[n,row] := p[n,row] + r^[n,(row + l - j{ - 1})];
 	       for col := 0 to i - 1 do
 		  for row := 0 to p.maxrow do
 		  begin

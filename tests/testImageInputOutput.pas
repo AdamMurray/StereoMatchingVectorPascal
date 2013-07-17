@@ -12,11 +12,11 @@ program testImageInputOutput;
 (*---------- Uses declarations ----------*)
 uses bmp;
 
-(*---------- Variable declarations ----------*)
+(*---------- Global variable declarations ----------*)
 var
    imageInLocation, imageOutLocation : string;
-   ImageInTemp			     : pimage;
-   ImageIn			     : pimage; {pimage is a pointer to an image type, defined in bmp} 
+   imageInTemp			     : pimage;
+   imageIn			     : pimage; {pimage is a pointer to an image type, defined in bmp} 
    
 (*---------- Procedures ----------*)
 (*
@@ -39,30 +39,29 @@ end; { userInput }
 
 (*---------- Main body of the program ----------*)
 begin
-   {user input}
+   {User input}
    userInput;
    
-   {load one of the images using the full path}
+   {Load one of the images using the full path}
    {and if successful then proceed}
-   if loadbmpfile(imageInLocation, ImageIn) then
+   if loadbmpfile(imageInLocation, imageIn) then
    begin
-      new(imageIn, imageIn ^.maxplane, imageIn ^.maxrow, imageIn ^.maxcol);
+      new(imageInTemp, imageIn ^.maxplane, imageIn ^.maxrow, imageIn ^.maxcol);
 
-      {if imageInTemp <> imageOutTemp then
+      if imageInTemp <> imageIn then
       begin
 	 writeln('Images do not match');
       end
       else
       begin
 	 writeln('Images match');
-	 storebmpfile(imageOutLocation, imageOutTemp^);
-      end;}
-
-      storebmpfile(imageOutLocation, imageInTemp^);
-      
+	 storebmpfile(imageOutLocation, imageInTemp^);
+      end;      
    end
    else writeln('Failed to load image file.');
 
+   {Dispose of image buffers}
+   dispose(imageIn);
    dispose(imageInTemp);
 end.
 (*---------- End of the program ----------*)

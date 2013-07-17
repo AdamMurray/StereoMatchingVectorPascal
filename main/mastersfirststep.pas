@@ -13,17 +13,17 @@ program mastersfirststep;
 (*---------- Uses declarations ----------*)
 uses bmp;
 
-(*---------- Constant declarations ----------*)
+(*---------- Global constant declarations ----------*)
 {const
    ;}
 
 
-(*---------- Type declarations ----------*)
+(*---------- Global type declarations ----------*)
 {type
    ;}
 
 
-(*---------- Variable declarations ----------*)
+(*---------- Global variable declarations ----------*)
 var
    {Information for the output product image}
    currentDate, currentTime, productImageLocation : string;

@@ -31,3 +31,9 @@ languages, but anyway I'll find that out in time.
 The important thing about this idea is that it's far from the focus of my project, so I shouldn't spend a huge
 amount of time on it. I need to get the main stuff done, and then write this in the spare time. It will, however,
 help my Java skills which will help get me a job probably, so it's a good thing to be working on.
+
+So, what should the GUI have:
+
+* A menu bar at the top, with the following items; exit, ...
+
+* 

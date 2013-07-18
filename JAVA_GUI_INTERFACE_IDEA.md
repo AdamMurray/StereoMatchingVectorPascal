@@ -32,6 +32,26 @@ The important thing about this idea is that it's far from the focus of my projec
 amount of time on it. I need to get the main stuff done, and then write this in the spare time. It will, however,
 help my Java skills which will help get me a job probably, so it's a good thing to be working on.
 
+So what, in short, should the GUI do:
+
+* It should have a way for the user to select two images to be matched (and any issues handled, like
+checking if the file extension is appropriate, maybe keep it to whatever extension is used in the pictures
+I've been given by Cockshott.
+
+* It should find out and store the absolute paths of the image files selected.
+
+* It should use these paths to create a bash script (for Linux which is the first step) which will then pass
+the paths as parameters to the VP algorithm.
+
+* The VP algorithm should obviously be able to accept these paths as parameters and use them in order to load
+the correct images.
+
+* The GUI should be able to read the input stream from the VP algorithm, such as informative output written by
+the algorithm and data such as time taken to complete the algorithy, and display this in the GUI via a JTextArea,
+or similar.
+
+* The whole program should be packaged in such a way that it can be compiled as an application and run in a standalone fashion.
+
 So, what should the GUI have:
 
 * A menu bar at the top, with the following items; exit, ...

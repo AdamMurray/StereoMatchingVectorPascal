@@ -11,5 +11,11 @@ package stereomatching.gui;
  */
 public class StereoMatchingController
 {
-
+	private String leftImageFileName, rightImageFileName;
+	
+	public StereoMatchingController(String leftImage, String rightImage)
+	{
+		leftImageFileName = leftImage;
+		rightImageFileName = rightImage;
+	}
 }

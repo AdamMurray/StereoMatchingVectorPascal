@@ -38,7 +38,7 @@ public class StereoMatchingGUI extends JFrame
 	private JPanel north, center, southRight, southLeft, south;
 	private JLabel leftImageFileNameLabel, rightImageFileNameLabel;
 	private JButton leftImageSelectButton, rightImageSelectButton, matchButton;
-	private JButton runButton, clearButton, saveButton;
+	private JButton runButton, openLeftImageButton, openRightImageButton, clearButton, saveButton;
 	private JTextArea outputTextArea;
 	private JScrollPane textAreaScrollPane;
 	private JFileChooser leftImageChooser, rightImageChooser;
@@ -61,7 +61,7 @@ public class StereoMatchingGUI extends JFrame
 
 	private void initialiseUI()
 	{
-		setTitle("Stereo Matching Program");
+		setTitle("Stereo Image Matcher v0.1");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();
 		setLocationRelativeTo(null);
@@ -95,9 +95,9 @@ public class StereoMatchingGUI extends JFrame
 				processLeftImageSelect();
 			}
 		});
-		
+
 		file.add(openLeftImageMenuItem);
-		
+
 		JMenuItem openRightImageMenuItem = new JMenuItem("Open right image...");
 		openRightImageMenuItem.addActionListener(new ActionListener()
 		{
@@ -106,9 +106,9 @@ public class StereoMatchingGUI extends JFrame
 				processRightImageSelect();
 			}
 		});
-		
+
 		file.add(openRightImageMenuItem);
-		
+
 		JMenuItem saveAsMenuItem = new JMenuItem("Save As...");
 		saveAsMenuItem.addActionListener(new ActionListener()
 		{
@@ -117,9 +117,9 @@ public class StereoMatchingGUI extends JFrame
 				processSaveOutput();
 			}
 		});
-		
+
 		file.add(saveAsMenuItem);
-		
+
 		//		ImageIcon exitIcon = new ImageIcon("./gui_icons/close_delete.png");
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.setMnemonic(KeyEvent.VK_E);
@@ -133,7 +133,7 @@ public class StereoMatchingGUI extends JFrame
 		});
 
 		file.add(exitMenuItem);
-		
+
 		menubar.add(file);
 
 		JMenu edit = new JMenu("Edit");
@@ -159,7 +159,7 @@ public class StereoMatchingGUI extends JFrame
 		{
 			public void actionPerformed(ActionEvent event)
 			{
-				//TODO add method for menu bar "About" button
+				processShowAboutDialog();
 			}
 		});
 
@@ -186,7 +186,7 @@ public class StereoMatchingGUI extends JFrame
 			{
 				public void actionPerformed(ActionEvent event)
 				{				
-					processMatchButton();
+					processMatchImages();
 				}
 			});
 		}
@@ -195,6 +195,50 @@ public class StereoMatchingGUI extends JFrame
 			iox.printStackTrace();
 		}
 		north.add(runButton);
+
+		BufferedImage openLeftImageButtonIcon;
+		try
+		{
+			openLeftImageButtonIcon = ImageIO.read(new File("./gui_icons/arrow_left.png"));
+			openLeftImageButton = new JButton(new ImageIcon(openLeftImageButtonIcon));
+			openLeftImageButton.setBorder(BorderFactory.createEmptyBorder());
+			openLeftImageButton.setContentAreaFilled(false);
+			openLeftImageButton.setToolTipText("Press to open left image of stereo pair");
+			openLeftImageButton.addActionListener(new ActionListener()
+			{
+				public void actionPerformed(ActionEvent event)
+				{				
+					processLeftImageSelect();
+				}
+			});
+		}
+		catch (IOException iox)
+		{
+			iox.printStackTrace();
+		}
+		north.add(openLeftImageButton);
+
+		BufferedImage openRightImageButtonIcon;
+		try
+		{
+			openRightImageButtonIcon = ImageIO.read(new File("./gui_icons/arrow_right.png"));
+			openRightImageButton = new JButton(new ImageIcon(openRightImageButtonIcon));
+			openRightImageButton.setBorder(BorderFactory.createEmptyBorder());
+			openRightImageButton.setContentAreaFilled(false);
+			openRightImageButton.setToolTipText("Press to open right image of stereo pair");
+			openRightImageButton.addActionListener(new ActionListener()
+			{
+				public void actionPerformed(ActionEvent event)
+				{				
+					processRightImageSelect();
+				}
+			});
+		}
+		catch (IOException iox)
+		{
+			iox.printStackTrace();
+		}
+		north.add(openRightImageButton);
 
 		BufferedImage clearButtonIcon;
 		try
@@ -217,7 +261,7 @@ public class StereoMatchingGUI extends JFrame
 			iox.printStackTrace();
 		}
 		north.add(clearButton);
-		
+
 		BufferedImage saveButtonIcon;
 		try
 		{
@@ -239,7 +283,7 @@ public class StereoMatchingGUI extends JFrame
 			iox.printStackTrace();
 		}
 		north.add(saveButton);
-		
+
 
 		this.add(north, BorderLayout.NORTH);
 	}
@@ -262,12 +306,16 @@ public class StereoMatchingGUI extends JFrame
 	private void addComponentsToSouth()
 	{
 		south = new JPanel();
-		south.setLayout(new FlowLayout((int) LEFT_ALIGNMENT));
+		south.setLayout(new GridLayout(2, 1));
 		south.setBorder(new TitledBorder(new EtchedBorder()));
 
-		leftImageFileNameLabel = new JLabel("Program started: " + getCurrentDate());
+		leftImageFileNameLabel = new JLabel("Left image file selected: none");
 		leftImageFileNameLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
 		south.add(leftImageFileNameLabel);
+
+		rightImageFileNameLabel = new JLabel("Right image file selected: none");
+		rightImageFileNameLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
+		south.add(rightImageFileNameLabel);
 
 		this.add(south, BorderLayout.SOUTH);
 	}
@@ -304,7 +352,7 @@ public class StereoMatchingGUI extends JFrame
 		outputTextArea.append("\nProgram started: " + getCurrentDate() + "\n\n");
 	}
 
-	private void processMatchButton()
+	private void processMatchImages()
 	{
 		try
 		{
@@ -343,7 +391,7 @@ public class StereoMatchingGUI extends JFrame
 		{
 			leftImageFilePath = leftImageChooser.getSelectedFile().getAbsolutePath();
 			leftImageFileName = leftImageChooser.getSelectedFile().getName();
-			leftImageFileNameLabel.setText("Selected file: " + leftImageFileName);
+			leftImageFileNameLabel.setText("Left image file selected: " + leftImageFileName);
 		}
 	}
 
@@ -356,20 +404,58 @@ public class StereoMatchingGUI extends JFrame
 		{
 			rightImageFilePath = rightImageChooser.getSelectedFile().getAbsolutePath();
 			rightImageFileName = rightImageChooser.getSelectedFile().getName();
-			rightImageFileNameLabel.setText("Selected file: " + rightImageFileName);
+			rightImageFileNameLabel.setText("Right image file select: " + rightImageFileName);
 		}
 	}
 
 	private void processSaveOutput()
 	{
 		//TODO complete processSaveOutput()
+		String outputFileName = null;
+		FileWriter outputFileWriter = null;
+		
+		try
+		{
+			try
+			{
+				outputFileName = JOptionPane.showInputDialog(this, "Enter save file name",
+						"Save Output", JOptionPane.QUESTION_MESSAGE);
+				if (outputFileName.equals(null))
+					throw new NullPointerException();
+				
+				outputFileWriter = new FileWriter(outputFileName + ".txt");
+				
+				outputFileWriter.write(outputTextArea.getText());
+			}
+			finally
+			{
+				if (outputFileWriter != null) outputFileWriter.close();
+			}
+		}
+		catch (IOException iox)
+		{
+			iox.printStackTrace();
+		}
+		catch (NullPointerException npx)
+		{
+			JOptionPane.showMessageDialog(this, "You must enter an output file name",
+					"Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
-	
+
+	private void processShowAboutDialog()
+	{
+		String aboutDialog = "Stereo Image Matcher" +
+				"\nVersion: 0.1" +
+				"\n\nThis program is a user interface for use in matching a pair of stereo images.";
+		JOptionPane.showMessageDialog(this, aboutDialog, "About", JOptionPane.INFORMATION_MESSAGE);
+	}
+
 	private void clearTextArea()
 	{
 		outputTextArea.setText("");
 	}
-	
+
 	private String getCurrentDate()
 	{
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");

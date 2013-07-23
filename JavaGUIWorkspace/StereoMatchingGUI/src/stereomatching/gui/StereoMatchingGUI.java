@@ -2,6 +2,9 @@ package stereomatching.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.text.*;
+import java.util.Date;
+
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -29,20 +32,20 @@ public class StereoMatchingGUI extends JFrame
 {
 	private JMenuBar menubar;
 	private JPanel center, centerRight, centerLeft, south;
-	private JTextField leftImageTextField, rightImageTextField; // will be changed to file choosers
-	private ImageIcon leftImageIcon, rightImageIcon;
+	private JLabel leftImageFileNameLabel, rightImageFileNameLabel;
 	private JButton leftImageSelectButton, rightImageSelectButton, matchButton;
 	private JTextArea outputTextArea;
 	private JScrollPane textAreaScrollPane;
 	private JFileChooser leftImageChooser, rightImageChooser;
 
 	private String leftImageFileName, rightImageFileName;
+	private String leftImageFilePath, rightImageFilePath;
 	private StereoMatchingController controller;
 
 	private final int GUI_WIDTH = 530;
-	private final int GUI_HEIGHT = 320;
+	private final int GUI_HEIGHT = 450;
 	private final String GUI_ICONS_LOCATION = "/home/adam/Dropbox/EclipseWorkspace/StereoMatchingGUI/icons/";
-	private final int OUTPUT_TEXT_AREA_ROWS = 10;
+	private final int OUTPUT_TEXT_AREA_ROWS = 16;
 	private final int OUTPUT_TEXT_AREA_COLS = 40;
 
 	public StereoMatchingGUI()
@@ -59,7 +62,7 @@ public class StereoMatchingGUI extends JFrame
 		setLocationRelativeTo(null);
 		setLocationByPlatform(true);
 		setSize(GUI_WIDTH, GUI_HEIGHT);
-		setLocation(400, 100);
+		setLocation(500, 100);
 		setResizable(true);
 	}
 
@@ -69,20 +72,21 @@ public class StereoMatchingGUI extends JFrame
 		addComponentsToNorth();
 		addComponentsToCenter();
 		addComponentsToSouth();
+		showWelcomeText();
 	}
 
 	private void addMenuBar()
 	{
 		menubar = new JMenuBar();
-		ImageIcon icon = new ImageIcon(GUI_ICONS_LOCATION + "application-exit.png");
+		ImageIcon exitIcon = new ImageIcon(GUI_ICONS_LOCATION + "application-exit.png");
 
 		JMenu file = new JMenu("File");
 		file.setMnemonic(KeyEvent.VK_F);
 
-		JMenuItem eMenuItem = new JMenuItem("Exit", icon);
-		eMenuItem.setMnemonic(KeyEvent.VK_E);
-		eMenuItem.setToolTipText("Exit application");
-		eMenuItem.addActionListener(new ActionListener()
+		JMenuItem exitMenuItem = new JMenuItem("Exit", exitIcon);
+		exitMenuItem.setMnemonic(KeyEvent.VK_E);
+		exitMenuItem.setToolTipText("Exit application");
+		exitMenuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
 			{
@@ -90,9 +94,39 @@ public class StereoMatchingGUI extends JFrame
 			}
 		});
 
-		file.add(eMenuItem);
+		file.add(exitMenuItem);
 
 		menubar.add(file);
+
+		JMenu edit = new JMenu("Edit");
+
+		JMenuItem clearTextAreaItem = new JMenuItem("Clear Text Area");
+		clearTextAreaItem.setToolTipText("Clears the output text area");
+		clearTextAreaItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				outputTextArea.setText("");
+			}
+		});
+
+		edit.add(clearTextAreaItem);
+		menubar.add(edit);
+
+		JMenu help = new JMenu("Help");
+
+		JMenuItem aboutMenuItem = new JMenuItem("About");
+		aboutMenuItem.setToolTipText("About application");
+		aboutMenuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				//TODO add method for menu bar "About" button
+			}
+		});
+
+		help.add(aboutMenuItem);
+		menubar.add(help);
 
 		setJMenuBar(menubar);
 	}
@@ -121,42 +155,44 @@ public class StereoMatchingGUI extends JFrame
 		centerLeft.setLayout(new BorderLayout());
 		centerLeft.setBorder(new TitledBorder(new EtchedBorder(), "Left Image Input"));
 
-		leftImageIcon = new ImageIcon();
-		JLabel leftImageIconLabel = new JLabel(leftImageIcon);
-		centerLeft.add(leftImageIconLabel, BorderLayout.CENTER);
+		leftImageFileNameLabel = new JLabel("Selected file: ");
+		centerLeft.add(leftImageFileNameLabel, BorderLayout.NORTH);
 
-		leftImageSelectButton = new JButton("Select left");
+		leftImageSelectButton = new JButton("Open file...");
+		leftImageSelectButton.setToolTipText("Select the left image of the stereo pair to be matched");
 		leftImageSelectButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
 			{				
 				processLeftImageSelect();
+				leftImageFileNameLabel.setText("Selected file: " + leftImageFileName);
 			}
 		});
-		
+
 		centerLeft.add(leftImageSelectButton, BorderLayout.SOUTH);
 
 		center.add(centerLeft);
 		this.add(center, BorderLayout.CENTER);
 
-		
+
 		centerRight = new JPanel();
 		centerRight.setLayout(new BorderLayout());
 		centerRight.setBorder(new TitledBorder(new EtchedBorder(), "Right Image Input"));
 
-		rightImageIcon = new ImageIcon();
-		JLabel rightImageIconLabel = new JLabel(rightImageIcon);
-		centerRight.add(rightImageIconLabel, BorderLayout.CENTER);
+		rightImageFileNameLabel = new JLabel("Selected file: ");
+		centerRight.add(rightImageFileNameLabel, BorderLayout.NORTH);
 
-		rightImageSelectButton = new JButton("Select right");
+		rightImageSelectButton = new JButton("Open file...");
+		rightImageSelectButton.setToolTipText("Select the right image of the stereo pair to be matched");
 		rightImageSelectButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
 			{				
 				processRightImageSelect();
+				rightImageFileNameLabel.setText("Selected file: " + rightImageFileName);
 			}
 		});
-		
+
 		centerRight.add(rightImageSelectButton, BorderLayout.SOUTH);
 
 		center.add(centerRight);
@@ -167,6 +203,7 @@ public class StereoMatchingGUI extends JFrame
 		south = new JPanel();
 
 		matchButton = new JButton("Match Images");
+		matchButton.setToolTipText("Press to initiate matching of selected stereo image pair");
 		matchButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
@@ -179,16 +216,25 @@ public class StereoMatchingGUI extends JFrame
 		this.add(south, BorderLayout.SOUTH);
 	}
 
+	private void showWelcomeText()
+	{
+		outputTextArea.append("Program started: " + getCurrentDate() + "\n\n");
+	}
+
 	private void processMatchButton()
 	{
-		controller = new StereoMatchingController(leftImageFileName,
-				rightImageFileName);
+		outputTextArea.append("Matching the following images: " +
+				"\n\tLeft image: " + leftImageFileName +
+				"\n\tRight image: " + rightImageFileName);
+		outputTextArea.append("\n\nMatching started: " + getCurrentDate() + "\n");
+
+		controller = new StereoMatchingController(
+				leftImageFilePath + leftImageFileName,
+				rightImageFilePath + rightImageFileName);
 		controller.runVectorPascalCode();
 
 		for (String errorLine : controller.getErrorLines())
-		{
 			outputTextArea.append(errorLine + "\n");
-		}
 
 		for (String outputLine : controller.getOutputLines())
 			outputTextArea.append(outputLine + "\n");
@@ -201,10 +247,8 @@ public class StereoMatchingGUI extends JFrame
 
 		if (returnValLeft == JFileChooser.APPROVE_OPTION)
 		{
-			leftImageFileName = leftImageChooser.getSelectedFile().getAbsolutePath() +
-					leftImageChooser.getSelectedFile().getName();
-
-			outputTextArea.append("Left image file: " +	leftImageChooser.getSelectedFile().getName() + "\n");
+			leftImageFilePath = leftImageChooser.getSelectedFile().getAbsolutePath();
+			leftImageFileName = leftImageChooser.getSelectedFile().getName();
 		}
 	}
 
@@ -215,12 +259,19 @@ public class StereoMatchingGUI extends JFrame
 
 		if (returnValRight == JFileChooser.APPROVE_OPTION)
 		{
-			rightImageFileName = rightImageChooser.getSelectedFile().getAbsolutePath() +
-					rightImageChooser.getSelectedFile().getName();
-
-			outputTextArea.append("Right image file: " + rightImageChooser.getSelectedFile().getName() + "\n");
+			rightImageFilePath = rightImageChooser.getSelectedFile().getAbsolutePath();
+			rightImageFileName = rightImageChooser.getSelectedFile().getName();
 		}
 	}
+
+	private String getCurrentDate()
+	{
+		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		Date date = new Date();
+		String dateString = dateFormat.format(date).toString();
+		return dateString;
+	}
+
 	/**
 	 * Main method.
 	 * Causes the EDT to be invoked.

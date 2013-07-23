@@ -31,16 +31,16 @@ public class StereoMatchingGUI extends JFrame
 	private JPanel center, centerRight, centerLeft, south;
 	private JTextField leftImageTextField, rightImageTextField; // will be changed to file choosers
 	private ImageIcon leftImageIcon, rightImageIcon;
-	private JButton matchButton;
+	private JButton leftImageSelectButton, rightImageSelectButton, matchButton;
 	private JTextArea outputTextArea;
 	private JScrollPane textAreaScrollPane;
 	private JFileChooser leftImageChooser, rightImageChooser;
-	
+
 	private String leftImageFileName, rightImageFileName;
 	private StereoMatchingController controller;
 
-	private final int GUI_WIDTH = 500;
-	private final int GUI_HEIGHT = 300;
+	private final int GUI_WIDTH = 530;
+	private final int GUI_HEIGHT = 320;
 	private final String GUI_ICONS_LOCATION = "/home/adam/Dropbox/EclipseWorkspace/StereoMatchingGUI/icons/";
 	private final int OUTPUT_TEXT_AREA_ROWS = 10;
 	private final int OUTPUT_TEXT_AREA_COLS = 40;
@@ -104,51 +104,68 @@ public class StereoMatchingGUI extends JFrame
 		outputTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		outputTextArea.setWrapStyleWord(true);
 		outputTextArea.setLineWrap(true);
-		
+
 		textAreaScrollPane = new JScrollPane();
 		textAreaScrollPane.setBorder(new TitledBorder(new EtchedBorder(), "Output"));
 		textAreaScrollPane.setViewportView(outputTextArea);
-		
+
 		this.add(textAreaScrollPane, BorderLayout.NORTH);
 	}
-	
+
 	private void addComponentsToCenter()
 	{
 		center = new JPanel();
 		center.setLayout(new GridLayout(1, 2));
-		
+
 		centerLeft = new JPanel();
 		centerLeft.setLayout(new BorderLayout());
 		centerLeft.setBorder(new TitledBorder(new EtchedBorder(), "Left Image Input"));
-		
+
 		leftImageIcon = new ImageIcon();
 		JLabel leftImageIconLabel = new JLabel(leftImageIcon);
 		centerLeft.add(leftImageIconLabel, BorderLayout.CENTER);
+
+		leftImageSelectButton = new JButton("Select left");
+		leftImageSelectButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{				
+				processLeftImageSelect();
+			}
+		});
 		
-		leftImageTextField = new JTextField();
-		centerLeft.add(leftImageTextField, BorderLayout.SOUTH);
-		
+		centerLeft.add(leftImageSelectButton, BorderLayout.SOUTH);
+
 		center.add(centerLeft);
 		this.add(center, BorderLayout.CENTER);
+
 		
 		centerRight = new JPanel();
 		centerRight.setLayout(new BorderLayout());
 		centerRight.setBorder(new TitledBorder(new EtchedBorder(), "Right Image Input"));
-		
+
 		rightImageIcon = new ImageIcon();
 		JLabel rightImageIconLabel = new JLabel(rightImageIcon);
 		centerRight.add(rightImageIconLabel, BorderLayout.CENTER);
+
+		rightImageSelectButton = new JButton("Select right");
+		rightImageSelectButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{				
+				processRightImageSelect();
+			}
+		});
 		
-		rightImageTextField = new JTextField();
-		centerRight.add(rightImageTextField, BorderLayout.SOUTH);
-		
+		centerRight.add(rightImageSelectButton, BorderLayout.SOUTH);
+
 		center.add(centerRight);
 	}
-	
+
 	private void addComponentsToSouth()
 	{
 		south = new JPanel();
-		
+
 		matchButton = new JButton("Match Images");
 		matchButton.addActionListener(new ActionListener()
 		{
@@ -157,37 +174,53 @@ public class StereoMatchingGUI extends JFrame
 				processMatchButton();
 			}
 		});
-		
+
 		south.add(matchButton);
 		this.add(south, BorderLayout.SOUTH);
 	}
-	
+
 	private void processMatchButton()
 	{
-		leftImageFileName = leftImageTextField.getText().trim();
-		rightImageFileName = rightImageTextField.getText().trim();
-		
 		controller = new StereoMatchingController(leftImageFileName,
-												rightImageFileName);
+				rightImageFileName);
 		controller.runVectorPascalCode();
-		
+
 		for (String errorLine : controller.getErrorLines())
 		{
 			outputTextArea.append(errorLine + "\n");
 		}
-		
+
 		for (String outputLine : controller.getOutputLines())
 			outputTextArea.append(outputLine + "\n");
-		
-		clearTextFields();
 	}
-	
-	private void clearTextFields()
+
+	private void processLeftImageSelect()
 	{
-		leftImageTextField.setText("");
-		rightImageTextField.setText("");
+		leftImageChooser = new JFileChooser();
+		int returnValLeft = leftImageChooser.showOpenDialog(this);
+
+		if (returnValLeft == JFileChooser.APPROVE_OPTION)
+		{
+			leftImageFileName = leftImageChooser.getSelectedFile().getAbsolutePath() +
+					leftImageChooser.getSelectedFile().getName();
+
+			outputTextArea.append("Left image file: " +	leftImageChooser.getSelectedFile().getName() + "\n");
+		}
 	}
-	
+
+	private void processRightImageSelect()
+	{
+		rightImageChooser = new JFileChooser();
+		int returnValRight = rightImageChooser.showOpenDialog(this);
+
+		if (returnValRight == JFileChooser.APPROVE_OPTION)
+		{
+			rightImageFileName = rightImageChooser.getSelectedFile().getAbsolutePath() +
+					rightImageChooser.getSelectedFile().getName();
+
+			outputTextArea.append("Right image file: " + rightImageChooser.getSelectedFile().getName() + "\n");
+		}
+	}
 	/**
 	 * Main method.
 	 * Causes the EDT to be invoked.

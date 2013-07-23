@@ -1,5 +1,7 @@
 package stereomatching.gui;
 
+import java.util.*;
+
 /**
  * Class that handles processing information
  * taken from the GUI and using it in order
@@ -13,6 +15,9 @@ public class StereoMatchingController
 {
 	private String leftImageFileName, rightImageFileName;
 	private String runVectorPascalCode;
+
+	private List<String> errorLines = new ArrayList<String>();
+	private List<String> outputLines = new ArrayList<String>();
 
 	public StereoMatchingController(String leftImage, String rightImage)
 	{
@@ -45,11 +50,18 @@ public class StereoMatchingController
 
 			// any error???
 			int exitVal = process.waitFor();
-			System.out.println("ExitValue: " + exitVal);        
+			System.out.println("ExitValue: " + exitVal);
+			
+			errorLines = errorGobbler.getLines();
+			outputLines = outputGobbler.getLines();
 		}
 		catch (Throwable t)
 		{
 			t.printStackTrace();
 		}
 	}
+
+	public List<String> getErrorLines() { return errorLines; }
+
+	public List<String> getOutputLines() { return outputLines; }
 }

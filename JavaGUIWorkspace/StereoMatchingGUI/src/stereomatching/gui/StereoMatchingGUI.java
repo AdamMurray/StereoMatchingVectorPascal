@@ -3,6 +3,8 @@ package stereomatching.gui;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 
 /**
  * Class that defines a GUI for handling user input.
@@ -25,28 +27,24 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 public class StereoMatchingGUI extends JFrame
 {
-	/* Instance variables */
 	private JMenuBar menubar;
-	private JPanel east, west, south;
+	private JPanel center, centerRight, centerLeft, south;
 	private JTextField leftImageTextField, rightImageTextField; // will be changed to file choosers
-	private JLabel leftImageLabel, rightImageLabel;
 	private ImageIcon leftImageIcon, rightImageIcon;
 	private JButton matchButton;
+	private JTextArea outputTextArea;
+	private JScrollPane textAreaScrollPane;
 	private JFileChooser leftImageChooser, rightImageChooser;
-	private String leftImageFileName, rightImageFileName;
 	
+	private String leftImageFileName, rightImageFileName;
 	private StereoMatchingController controller;
 
-	/* Class constants */
-	private final static int GUI_WIDTH = 400;
-	private final static int GUI_HEIGHT = 500;
-	//	private final int GUI_X_POSITION = 500;
-	//	private final int GUI_Y_POSITION = 500;
+	private final int GUI_WIDTH = 500;
+	private final int GUI_HEIGHT = 300;
 	private final String GUI_ICONS_LOCATION = "/home/adam/Dropbox/EclipseWorkspace/StereoMatchingGUI/icons/";
+	private final int OUTPUT_TEXT_AREA_ROWS = 10;
+	private final int OUTPUT_TEXT_AREA_COLS = 40;
 
-	/*
-	 * Constructor
-	 */
 	public StereoMatchingGUI()
 	{
 		initialiseUI();
@@ -61,30 +59,26 @@ public class StereoMatchingGUI extends JFrame
 		setLocationRelativeTo(null);
 		setLocationByPlatform(true);
 		setSize(GUI_WIDTH, GUI_HEIGHT);
+		setLocation(400, 100);
 		setResizable(true);
 	}
 
 	private void layoutComponents()
 	{
 		addMenuBar();
-		addComponentsToWest();
-		addComponentsToEast();
+		addComponentsToNorth();
+		addComponentsToCenter();
 		addComponentsToSouth();
 	}
 
 	private void addMenuBar()
 	{
-		// Create menu bar component
 		menubar = new JMenuBar();
-		// Create image icon component as an exit image
 		ImageIcon icon = new ImageIcon(GUI_ICONS_LOCATION + "application-exit.png");
 
-		// Create a menu component, name it
 		JMenu file = new JMenu("File");
-		// Set mnemonic of the menu
 		file.setMnemonic(KeyEvent.VK_F);
 
-		// Create menu item component
 		JMenuItem eMenuItem = new JMenuItem("Exit", icon);
 		eMenuItem.setMnemonic(KeyEvent.VK_E);
 		eMenuItem.setToolTipText("Exit application");
@@ -96,50 +90,59 @@ public class StereoMatchingGUI extends JFrame
 			}
 		});
 
-		// Add menu component to file menu
 		file.add(eMenuItem);
 
-		// Add menu to menu bar
 		menubar.add(file);
 
-		// Set the menu bar in the frame
 		setJMenuBar(menubar);
 	}
 
-	private void addComponentsToWest()
+	private void addComponentsToNorth()
 	{
-		west = new JPanel();
-		west.setLayout(new BorderLayout());
+		outputTextArea = new JTextArea(OUTPUT_TEXT_AREA_ROWS, OUTPUT_TEXT_AREA_COLS);
+		outputTextArea.setEditable(false);
+		outputTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		outputTextArea.setWrapStyleWord(true);
+		outputTextArea.setLineWrap(true);
 		
-		leftImageLabel = new JLabel("Left Image");
-		west.add(leftImageLabel, BorderLayout.NORTH);
+		textAreaScrollPane = new JScrollPane();
+		textAreaScrollPane.setBorder(new TitledBorder(new EtchedBorder(), "Output"));
+		textAreaScrollPane.setViewportView(outputTextArea);
+		
+		this.add(textAreaScrollPane, BorderLayout.NORTH);
+	}
+	
+	private void addComponentsToCenter()
+	{
+		center = new JPanel();
+		center.setLayout(new GridLayout(1, 2));
+		
+		centerLeft = new JPanel();
+		centerLeft.setLayout(new BorderLayout());
+		centerLeft.setBorder(new TitledBorder(new EtchedBorder(), "Left Image Input"));
 		
 		leftImageIcon = new ImageIcon();
 		JLabel leftImageIconLabel = new JLabel(leftImageIcon);
-		west.add(leftImageIconLabel, BorderLayout.CENTER);
+		centerLeft.add(leftImageIconLabel, BorderLayout.CENTER);
 		
 		leftImageTextField = new JTextField();
-		west.add(leftImageTextField, BorderLayout.SOUTH);
+		centerLeft.add(leftImageTextField, BorderLayout.SOUTH);
 		
-		this.add(west, BorderLayout.WEST);
-	}
-	
-	private void addComponentsToEast()
-	{
-		east = new JPanel();
-		east.setLayout(new BorderLayout());
+		center.add(centerLeft);
+		this.add(center, BorderLayout.CENTER);
 		
-		rightImageLabel = new JLabel("Right Image");
-		east.add(rightImageLabel, BorderLayout.NORTH);
+		centerRight = new JPanel();
+		centerRight.setLayout(new BorderLayout());
+		centerRight.setBorder(new TitledBorder(new EtchedBorder(), "Right Image Input"));
 		
 		rightImageIcon = new ImageIcon();
 		JLabel rightImageIconLabel = new JLabel(rightImageIcon);
-		east.add(rightImageIconLabel, BorderLayout.CENTER);
+		centerRight.add(rightImageIconLabel, BorderLayout.CENTER);
 		
 		rightImageTextField = new JTextField();
-		east.add(rightImageTextField, BorderLayout.SOUTH);
+		centerRight.add(rightImageTextField, BorderLayout.SOUTH);
 		
-		this.add(east, BorderLayout.EAST);
+		center.add(centerRight);
 	}
 	
 	private void addComponentsToSouth()
@@ -167,6 +170,14 @@ public class StereoMatchingGUI extends JFrame
 		controller = new StereoMatchingController(leftImageFileName,
 												rightImageFileName);
 		controller.runVectorPascalCode();
+		
+		for (String errorLine : controller.getErrorLines())
+		{
+			outputTextArea.append(errorLine + "\n");
+		}
+		
+		for (String outputLine : controller.getOutputLines())
+			outputTextArea.append(outputLine + "\n");
 		
 		clearTextFields();
 	}

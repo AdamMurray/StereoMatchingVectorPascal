@@ -1,16 +1,19 @@
 package stereomatching.gui;
 
 import java.io.*;
+import java.util.*;
 
 /*
  * Class to handle the standard error and standard input streams.
- * StreamGobbler empties any stream passes into it in a separate
+ * StreamGobbler empties any stream passed into it in a separate
  * thread.
  */
 class StreamGobbler extends Thread
 {
 	private InputStream inputStream;
 	private String type;
+	private String line;
+	private List<String> lines = new ArrayList<String>();
 
 	public StreamGobbler(InputStream inputStream, String type)
 	{
@@ -24,13 +27,17 @@ class StreamGobbler extends Thread
 		{
 			InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 			BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-			String line = null;
+			line = null;
 			while ((line = bufferedReader.readLine()) != null)
-				System.out.println(type + "> " + line);    
+			{
+				lines.add(line);
+			}
 		}
 		catch (IOException iox)
 		{
-			iox.printStackTrace();  
+			iox.printStackTrace();
 		}
 	}
+
+	public List<String> getLines() { return lines; }
 }

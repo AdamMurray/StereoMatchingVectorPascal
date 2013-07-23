@@ -32,6 +32,7 @@ public class StereoMatchingGUI extends JFrame
 	private JLabel leftImageLabel, rightImageLabel;
 	private ImageIcon leftImageIcon, rightImageIcon;
 	private JButton matchButton;
+	private JFileChooser leftImageChooser, rightImageChooser;
 	private String leftImageFileName, rightImageFileName;
 	
 	private StereoMatchingController controller;
@@ -161,10 +162,11 @@ public class StereoMatchingGUI extends JFrame
 	private void processMatchButton()
 	{
 		leftImageFileName = leftImageTextField.getText().trim();
-		rightImageFileName = leftImageTextField.getText().trim();
+		rightImageFileName = rightImageTextField.getText().trim();
 		
 		controller = new StereoMatchingController(leftImageFileName,
 												rightImageFileName);
+		controller.runVectorPascalCode();
 		
 		clearTextFields();
 	}

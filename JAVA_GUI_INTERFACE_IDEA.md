@@ -52,8 +52,4 @@ or similar.
 
 * The whole program should be packaged in such a way that it can be compiled as an application and run in a standalone fashion.
 
-So, what should the GUI have:
 
-* A menu bar at the top, with the following items; exit, ...
-
-* 

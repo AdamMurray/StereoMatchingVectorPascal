@@ -410,7 +410,6 @@ public class StereoMatchingGUI extends JFrame
 
 	private void processSaveOutput()
 	{
-		//TODO complete processSaveOutput()
 		String outputFileName = null;
 		FileWriter outputFileWriter = null;
 		
@@ -418,6 +417,9 @@ public class StereoMatchingGUI extends JFrame
 		{
 			try
 			{
+				if (outputTextArea.getText().equals(""))
+					throw new IllegalArgumentException();
+				
 				outputFileName = JOptionPane.showInputDialog(this, "Enter save file name",
 						"Save Output", JOptionPane.QUESTION_MESSAGE);
 				if (outputFileName.equals(null))
@@ -431,6 +433,11 @@ public class StereoMatchingGUI extends JFrame
 			{
 				if (outputFileWriter != null) outputFileWriter.close();
 			}
+		}
+		catch (IllegalArgumentException iax)
+		{
+			JOptionPane.showMessageDialog(this, "There is no output to save",
+					"No Output", JOptionPane.INFORMATION_MESSAGE);
 		}
 		catch (IOException iox)
 		{

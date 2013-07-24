@@ -30,7 +30,7 @@ class StreamGobbler extends Thread
 			line = null;
 			while ((line = bufferedReader.readLine()) != null)
 			{
-				lines.add(line);
+				lines.add(type + " " + line);
 			}
 		}
 		catch (IOException iox)

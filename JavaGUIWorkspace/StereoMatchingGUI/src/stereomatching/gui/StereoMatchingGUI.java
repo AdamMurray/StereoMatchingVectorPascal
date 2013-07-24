@@ -6,12 +6,9 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.*;
 import java.util.*;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
+import javax.swing.border.*;
 
 /**
  * Class that defines a GUI for handling user input.
@@ -35,9 +32,8 @@ import javax.swing.border.TitledBorder;
 public class StereoMatchingGUI extends JFrame
 {
 	private JMenuBar menubar;
-	private JPanel north, center, southRight, southLeft, south;
+	private JPanel north, south;
 	private JLabel leftImageFileNameLabel, rightImageFileNameLabel;
-	private JButton leftImageSelectButton, rightImageSelectButton, matchButton;
 	private JButton runButton, openLeftImageButton, openRightImageButton, clearButton, saveButton;
 	private JTextArea outputTextArea;
 	private JScrollPane textAreaScrollPane;
@@ -45,6 +41,7 @@ public class StereoMatchingGUI extends JFrame
 
 	private String leftImageFileName, rightImageFileName;
 	private String leftImageFilePath, rightImageFilePath;
+	private String outputFileName;
 	private StereoMatchingController controller;
 
 	private final int GUI_WIDTH = 530;
@@ -109,8 +106,9 @@ public class StereoMatchingGUI extends JFrame
 
 		file.add(openRightImageMenuItem);
 
-		JMenuItem saveAsMenuItem = new JMenuItem("Save As...");
-		saveAsMenuItem.addActionListener(new ActionListener()
+		file.addSeparator();
+		JMenuItem saveMenuItem = new JMenuItem("Save");
+		saveMenuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
 			{
@@ -118,8 +116,20 @@ public class StereoMatchingGUI extends JFrame
 			}
 		});
 
+		file.add(saveMenuItem);
+		
+		JMenuItem saveAsMenuItem = new JMenuItem("Save As...");
+		saveAsMenuItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				processSaveAsOutput();
+			}
+		});
+
 		file.add(saveAsMenuItem);
 
+		file.addSeparator();
 		//		ImageIcon exitIcon = new ImageIcon("./gui_icons/close_delete.png");
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.setMnemonic(KeyEvent.VK_E);
@@ -151,6 +161,20 @@ public class StereoMatchingGUI extends JFrame
 		edit.add(clearTextAreaItem);
 		menubar.add(edit);
 
+		JMenu view = new JMenu("View");
+
+		JMenuItem showStatusBarItem = new JMenuItem("Show Status Bar");
+		clearTextAreaItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				processShowStatusBar();
+			}
+		});
+
+		view.add(showStatusBarItem);
+		menubar.add(view);
+		
 		JMenu help = new JMenu("Help");
 
 		JMenuItem aboutMenuItem = new JMenuItem("About");
@@ -274,7 +298,7 @@ public class StereoMatchingGUI extends JFrame
 			{
 				public void actionPerformed(ActionEvent event)
 				{				
-					processSaveOutput();
+					processSaveAsOutput();
 				}
 			});
 		}
@@ -291,13 +315,15 @@ public class StereoMatchingGUI extends JFrame
 	private void addComponentsToCenter()
 	{
 		outputTextArea = new JTextArea(OUTPUT_TEXT_AREA_ROWS, OUTPUT_TEXT_AREA_COLS);
+		outputTextArea.setBackground(Color.BLACK);
+		outputTextArea.setForeground(Color.ORANGE);
 		outputTextArea.setEditable(false);
 		outputTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		outputTextArea.setWrapStyleWord(true);
 		outputTextArea.setLineWrap(true);
 
 		textAreaScrollPane = new JScrollPane();
-		textAreaScrollPane.setBorder(new TitledBorder(new EtchedBorder(), "Program Output"));
+//		textAreaScrollPane.setBorder(new TitledBorder(new EtchedBorder(), "Program Output"));
 		textAreaScrollPane.setViewportView(outputTextArea);
 
 		this.add(textAreaScrollPane, BorderLayout.CENTER);
@@ -309,11 +335,11 @@ public class StereoMatchingGUI extends JFrame
 		south.setLayout(new GridLayout(2, 1));
 		south.setBorder(new TitledBorder(new EtchedBorder()));
 
-		leftImageFileNameLabel = new JLabel("Left image file selected: none");
+		leftImageFileNameLabel = new JLabel("Left image file selected: ----");
 		leftImageFileNameLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
 		south.add(leftImageFileNameLabel);
 
-		rightImageFileNameLabel = new JLabel("Right image file selected: none");
+		rightImageFileNameLabel = new JLabel("Right image file selected: ----");
 		rightImageFileNameLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
 		south.add(rightImageFileNameLabel);
 
@@ -385,6 +411,7 @@ public class StereoMatchingGUI extends JFrame
 	private void processLeftImageSelect()
 	{
 		leftImageChooser = new JFileChooser();
+		leftImageChooser.setCurrentDirectory(new File("./"));
 		int returnValLeft = leftImageChooser.showOpenDialog(this);
 
 		if (returnValLeft == JFileChooser.APPROVE_OPTION)
@@ -398,6 +425,7 @@ public class StereoMatchingGUI extends JFrame
 	private void processRightImageSelect()
 	{
 		rightImageChooser = new JFileChooser();
+		rightImageChooser.setCurrentDirectory(new File("./"));
 		int returnValRight = rightImageChooser.showOpenDialog(this);
 
 		if (returnValRight == JFileChooser.APPROVE_OPTION)
@@ -410,7 +438,45 @@ public class StereoMatchingGUI extends JFrame
 
 	private void processSaveOutput()
 	{
-		String outputFileName = null;
+		FileWriter outputFileWriter = null;
+		
+		try
+		{
+			try
+			{
+				if (outputFileName == null)
+				{
+					processSaveAsOutput();
+				}
+				else
+				{
+					if (outputTextArea.getText().equals(""))
+						throw new IllegalArgumentException();
+					
+					outputFileWriter = new FileWriter(outputFileName + ".txt");
+					
+					outputFileWriter.write(outputTextArea.getText());
+				}
+			}
+			finally
+			{
+				if (outputFileWriter != null) outputFileWriter.close();
+			}
+		}
+		catch (IllegalArgumentException iax)
+		{
+			JOptionPane.showMessageDialog(this, "There is no output to save",
+					"No Output", JOptionPane.INFORMATION_MESSAGE);
+		}
+		catch (IOException iox)
+		{
+			iox.printStackTrace();
+		}
+	}
+	
+	private void processSaveAsOutput()
+	{
+		outputFileName = null;
 		FileWriter outputFileWriter = null;
 		
 		try
@@ -458,6 +524,11 @@ public class StereoMatchingGUI extends JFrame
 		JOptionPane.showMessageDialog(this, aboutDialog, "About", JOptionPane.INFORMATION_MESSAGE);
 	}
 
+	private void processShowStatusBar()
+	{
+		//TODO complete processShowStatusBar
+	}
+	
 	private void clearTextArea()
 	{
 		outputTextArea.setText("");

@@ -39,6 +39,9 @@ public class StereoMatchingGUI extends JFrame
 	private JScrollPane textAreaScrollPane;
 	private JFileChooser leftImageChooser, rightImageChooser;
 
+	private ImageIcon errorIcon = new ImageIcon("./gui_icons/close_delete.png");
+	private ImageIcon infoIcon = new ImageIcon("./gui_icons/information.png");
+
 	private String leftImageFileName, rightImageFileName;
 	private String leftImageFilePath, rightImageFilePath;
 	private String outputFileName;
@@ -117,7 +120,7 @@ public class StereoMatchingGUI extends JFrame
 		});
 
 		file.add(saveMenuItem);
-		
+
 		JMenuItem saveAsMenuItem = new JMenuItem("Save As...");
 		saveAsMenuItem.addActionListener(new ActionListener()
 		{
@@ -174,7 +177,7 @@ public class StereoMatchingGUI extends JFrame
 
 		view.add(showStatusBarItem);
 		menubar.add(view);
-		
+
 		JMenu help = new JMenu("Help");
 
 		JMenuItem aboutMenuItem = new JMenuItem("About");
@@ -323,7 +326,7 @@ public class StereoMatchingGUI extends JFrame
 		outputTextArea.setLineWrap(true);
 
 		textAreaScrollPane = new JScrollPane();
-//		textAreaScrollPane.setBorder(new TitledBorder(new EtchedBorder(), "Program Output"));
+		//		textAreaScrollPane.setBorder(new TitledBorder(new EtchedBorder(), "Program Output"));
 		textAreaScrollPane.setViewportView(outputTextArea);
 
 		this.add(textAreaScrollPane, BorderLayout.CENTER);
@@ -402,9 +405,10 @@ public class StereoMatchingGUI extends JFrame
 				outputTextArea.append(outputLine + "\n");
 		}
 		catch (NullPointerException npx)
-		{
+		{			
 			JOptionPane.showMessageDialog(this, "You must specify two images to be matched",
-					"Error", JOptionPane.ERROR_MESSAGE);
+					"Error", JOptionPane.ERROR_MESSAGE,
+					errorIcon);
 		}
 	}
 
@@ -439,7 +443,7 @@ public class StereoMatchingGUI extends JFrame
 	private void processSaveOutput()
 	{
 		FileWriter outputFileWriter = null;
-		
+
 		try
 		{
 			try
@@ -452,9 +456,9 @@ public class StereoMatchingGUI extends JFrame
 				{
 					if (outputTextArea.getText().equals(""))
 						throw new IllegalArgumentException();
-					
-					outputFileWriter = new FileWriter(outputFileName + ".txt");
-					
+
+					outputFileWriter = new FileWriter(outputFileName);
+
 					outputFileWriter.write(outputTextArea.getText());
 				}
 			}
@@ -466,34 +470,40 @@ public class StereoMatchingGUI extends JFrame
 		catch (IllegalArgumentException iax)
 		{
 			JOptionPane.showMessageDialog(this, "There is no output to save",
-					"No Output", JOptionPane.INFORMATION_MESSAGE);
+					"No Output", JOptionPane.INFORMATION_MESSAGE,
+					infoIcon);
 		}
 		catch (IOException iox)
 		{
-			iox.printStackTrace();
+			JOptionPane.showMessageDialog(this, "File could not be written to",
+					"Error", JOptionPane.ERROR_MESSAGE,
+					errorIcon);
 		}
 	}
-	
+
 	private void processSaveAsOutput()
 	{
 		outputFileName = null;
 		FileWriter outputFileWriter = null;
-		
+
 		try
 		{
 			try
 			{
 				if (outputTextArea.getText().equals(""))
 					throw new IllegalArgumentException();
-				
-				outputFileName = JOptionPane.showInputDialog(this, "Enter save file name",
-						"Save Output", JOptionPane.QUESTION_MESSAGE);
-				if (outputFileName.equals(null))
-					throw new NullPointerException();
-				
-				outputFileWriter = new FileWriter(outputFileName + ".txt");
-				
-				outputFileWriter.write(outputTextArea.getText());
+
+				JFileChooser fileSaveChooser = new JFileChooser();
+				fileSaveChooser.setCurrentDirectory(new File("./"));
+				int returnValFileSave = fileSaveChooser.showSaveDialog(this);
+
+				if (returnValFileSave == JFileChooser.APPROVE_OPTION)
+				{
+					outputFileName = fileSaveChooser.getSelectedFile().getName();
+					File saveFile = fileSaveChooser.getSelectedFile();
+					outputFileWriter = new FileWriter(saveFile);
+					outputFileWriter.write(outputTextArea.getText());
+				}
 			}
 			finally
 			{
@@ -503,16 +513,20 @@ public class StereoMatchingGUI extends JFrame
 		catch (IllegalArgumentException iax)
 		{
 			JOptionPane.showMessageDialog(this, "There is no output to save",
-					"No Output", JOptionPane.INFORMATION_MESSAGE);
+					"No Output", JOptionPane.INFORMATION_MESSAGE,
+					infoIcon);
 		}
 		catch (IOException iox)
 		{
-			iox.printStackTrace();
+			JOptionPane.showMessageDialog(this, "File could not be written to",
+					"Error", JOptionPane.ERROR_MESSAGE,
+					errorIcon);
 		}
 		catch (NullPointerException npx)
 		{
 			JOptionPane.showMessageDialog(this, "You must enter an output file name",
-					"Error", JOptionPane.ERROR_MESSAGE);
+					"Error", JOptionPane.ERROR_MESSAGE,
+					errorIcon);
 		}
 	}
 
@@ -528,7 +542,7 @@ public class StereoMatchingGUI extends JFrame
 	{
 		//TODO complete processShowStatusBar
 	}
-	
+
 	private void clearTextArea()
 	{
 		outputTextArea.setText("");

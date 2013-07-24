@@ -120,15 +120,15 @@ procedure applyConvolution(var p : image; var K : matrix);
       p[][][0..i-1] := 0;
       p[][1 + p.maxrow - j..p.maxrow] := 0;
       p[][][1 + p.maxcol - i..p.maxcol] := 0;
-      for n := 0 to p.maxplane do
-	 for l := 1 to K.rows do
-	    for m := 1 to K.cols do
+      for n := 1 to p.maxplane do
+	 for l := 1 to k.rows do
+	    for m := 1 to k.cols do
 	    begin
 	       r := preMultPointer^[l,m];
 	       for row := 0 to j - 1 do
-		  p[n,row] := p[n,row] + r^[n,(row + l - j{- 1})];
-	       for row := j + 1 to p.maxrow do
-		  p[n,row] := p[n,row] + r^[n,(row + l - j{ - 1})];
+		  p[n,row] := p[n,row] + r^[n,(row + l - j - 1)];
+	       for row := p.maxrow+j + 1 to p.maxrow do
+		  p[n,row] := p[n,row] + r^[n,(row + l - j - 1)];
 	       for col := 0 to i - 1 do
 		  for row := 0 to p.maxrow do
 		  begin
@@ -137,7 +137,7 @@ procedure applyConvolution(var p : image; var K : matrix);
 	       for col := 1 + p.maxcol - i to p.maxcol do
 		  for row := 0 to p.maxrow do
 		  begin
-		     p[n,row,col] := p[n,row,col]{ +  r^[n]};
+		     p[n,row,col] := p[n,row,col] + r^[n];
 		  end;
 	       {$r+}
 	    end;
@@ -179,7 +179,7 @@ begin
    for i := 1 to K.rows do
       for j := 1 to K.cols do
 	 preMultPointer^[i, j] := preMultiplication(i, j);
-
+   
    {Initialise a and b which store the steps
    away from the centre of the kernel}
    a := (K.rows) div 2;
@@ -236,6 +236,7 @@ begin
 	 end;}
       kernel^ := -1;
       writeln('Kernel initialised.');
+      writeln(kernel^);
       
       {Apply general convolution}
       writeln('Attempting to apply convolution...');

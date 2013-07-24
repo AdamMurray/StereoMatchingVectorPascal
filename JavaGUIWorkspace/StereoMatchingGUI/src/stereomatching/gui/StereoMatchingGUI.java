@@ -32,14 +32,15 @@ import javax.swing.border.*;
 public class StereoMatchingGUI extends JFrame
 {
 	private JMenuBar menubar;
-	private JPanel north, south;
+	private JPanel north, center, south;
 	private JLabel leftImageFileNameLabel, rightImageFileNameLabel;
 	private JButton runButton, openLeftImageButton, openRightImageButton;
 	private JButton clearButton, saveButton, saveAsButton, exitButton;
-	private JTextArea outputTextArea;
-	private JScrollPane textAreaScrollPane;
+	private JTextArea outputTextArea, infoTextArea;
+	private JScrollPane outputTextAreaScrollPane;
 	private JFileChooser leftImageChooser, rightImageChooser;
 
+	private ImageIcon attentionIcon = new ImageIcon("./gui_icons/attention.png");
 	private ImageIcon clearIcon = new ImageIcon("./gui_icons/eraser.png");
 	private ImageIcon errorIcon = new ImageIcon("./gui_icons/close_delete.png");
 	private ImageIcon exitIcon = new ImageIcon("./gui_icons/delete_2.png");
@@ -55,11 +56,8 @@ public class StereoMatchingGUI extends JFrame
 	private String outputFileName;
 	private StereoMatchingController controller;
 
-	private final int GUI_WIDTH = 530;
-	private final int GUI_HEIGHT = 450;
-	private final String GUI_ICONS_LOCATION = "/home/adam/Dropbox/EclipseWorkspace/StereoMatchingGUI/gui_icons/";
-	private final int OUTPUT_TEXT_AREA_ROWS = 16;
-	private final int OUTPUT_TEXT_AREA_COLS = 40;
+	private final int GUI_WIDTH = 850;
+	private final int GUI_HEIGHT = 550;
 
 	public StereoMatchingGUI()
 	{
@@ -148,7 +146,7 @@ public class StereoMatchingGUI extends JFrame
 		{
 			public void actionPerformed(ActionEvent event)
 			{
-				System.exit(0);
+				processExitProgram();
 			}
 		});
 
@@ -158,22 +156,22 @@ public class StereoMatchingGUI extends JFrame
 
 		JMenu edit = new JMenu("Edit");
 
-		JMenuItem clearTextAreaItem = new JMenuItem("Clear Output");
-		clearTextAreaItem.addActionListener(new ActionListener()
+		JMenuItem processClearOutputItem = new JMenuItem("Clear Output");
+		processClearOutputItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
 			{
-				clearTextArea();
+				processClearOutput();
 			}
 		});
 
-		edit.add(clearTextAreaItem);
+		edit.add(processClearOutputItem);
 		menubar.add(edit);
 
 		JMenu view = new JMenu("View");
 
 		JMenuItem showStatusBarItem = new JMenuItem("Show Status Bar");
-		clearTextAreaItem.addActionListener(new ActionListener()
+		processClearOutputItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
 			{
@@ -271,7 +269,7 @@ public class StereoMatchingGUI extends JFrame
 		{
 			public void actionPerformed(ActionEvent event)
 			{				
-				clearTextArea();
+				processClearOutput();
 			}
 		});
 		north.add(clearButton);
@@ -312,7 +310,7 @@ public class StereoMatchingGUI extends JFrame
 		{
 			public void actionPerformed(ActionEvent event)
 			{				
-				System.exit(0);
+				processExitProgram();
 			}
 		});
 		north.add(exitButton);
@@ -322,19 +320,69 @@ public class StereoMatchingGUI extends JFrame
 
 	private void addComponentsToCenter()
 	{
-		outputTextArea = new JTextArea(OUTPUT_TEXT_AREA_ROWS, OUTPUT_TEXT_AREA_COLS);
+		center = new JPanel();
+		center.setLayout(new GridLayout(1, 2));
+		
+		JPanel centerLeft = new JPanel();
+		centerLeft.setLayout(new BorderLayout());
+		centerLeft.setBorder(new EtchedBorder());
+		center.add(centerLeft);
+		
+		outputTextArea = new JTextArea();
 		outputTextArea.setBackground(Color.BLACK);
 		outputTextArea.setForeground(Color.ORANGE);
 		outputTextArea.setEditable(false);
-		outputTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
+		outputTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		outputTextArea.setWrapStyleWord(true);
 		outputTextArea.setLineWrap(true);
 
-		textAreaScrollPane = new JScrollPane();
-		//		textAreaScrollPane.setBorder(new TitledBorder(new EtchedBorder(), "Program Output"));
-		textAreaScrollPane.setViewportView(outputTextArea);
-
-		this.add(textAreaScrollPane, BorderLayout.CENTER);
+		outputTextAreaScrollPane = new JScrollPane();
+		//		outputTextAreaScrollPane.setBorder(new TitledBorder(new EtchedBorder(), "Program Output"));
+		outputTextAreaScrollPane.setViewportView(outputTextArea);
+		centerLeft.add(outputTextAreaScrollPane, BorderLayout.CENTER);
+		
+		JPanel centerRight = new JPanel();		
+		centerRight.setLayout(new GridLayout(2,1));
+		center.add(centerRight);
+		
+		JPanel centerRightTop = new JPanel();
+		centerRightTop.setLayout(new GridLayout(8, 1));
+		centerRightTop.setBorder(new EtchedBorder());
+		centerRight.add(centerRightTop);
+		
+		JLabel lImageNameLabel, rImageNameLabel,
+		timeTakenForMatchLabel, averageMatchTimeLabel, numberOfMatchesLabel;
+		lImageNameLabel = new JLabel("Left image chosen: ");
+		lImageNameLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		rImageNameLabel = new JLabel("Right image chosen: ");
+		numberOfMatchesLabel = new JLabel("Total matches done: ");
+		timeTakenForMatchLabel = new JLabel("Time taken for last match: ");
+		averageMatchTimeLabel = new JLabel("Average match time: ");
+		
+		centerRightTop.add(lImageNameLabel);
+		centerRightTop.add(rImageNameLabel);
+		centerRightTop.add(numberOfMatchesLabel);
+		centerRightTop.add(timeTakenForMatchLabel);
+		centerRightTop.add(averageMatchTimeLabel);
+		
+		JPanel centerRightBottom = new JPanel();
+		centerRightBottom.setLayout(new BorderLayout());
+		centerRightBottom.setBorder(new EtchedBorder());
+		centerRight.add(centerRightBottom);		
+		
+		infoTextArea = new JTextArea();
+		infoTextArea.setBackground(Color.BLACK);
+		infoTextArea.setForeground(Color.ORANGE);
+		infoTextArea.setEditable(false);
+		infoTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		infoTextArea.setWrapStyleWord(true);
+		infoTextArea.setLineWrap(true);
+		
+		JScrollPane infoTextAreaScrollPane = new JScrollPane();
+		infoTextAreaScrollPane.setViewportView(infoTextArea);
+		centerRightBottom.add(infoTextAreaScrollPane, BorderLayout.CENTER);
+		
+		this.add(center, BorderLayout.CENTER);
 	}
 
 	private void addComponentsToSouth()
@@ -368,7 +416,7 @@ public class StereoMatchingGUI extends JFrame
 
 				while (in.hasNextLine())
 				{
-					outputTextArea.append(in.nextLine() + "\n");
+					infoTextArea.append(in.nextLine() + "\n");
 				}
 
 				in.close();
@@ -383,7 +431,7 @@ public class StereoMatchingGUI extends JFrame
 			System.err.println("Welcome file cannot be opened");
 		}
 
-		outputTextArea.append("\nProgram started: " + getCurrentDate() + "\n\n");
+		infoTextArea.append("\nProgram started: " + getCurrentDate() + "\n\n");
 	}
 
 	private void processMatchImages()
@@ -476,7 +524,7 @@ public class StereoMatchingGUI extends JFrame
 		{
 			JOptionPane.showMessageDialog(this, "There is no output to save",
 					"No Output", JOptionPane.INFORMATION_MESSAGE,
-					infoIcon);
+					attentionIcon);
 		}
 		catch (IOException iox)
 		{
@@ -519,7 +567,7 @@ public class StereoMatchingGUI extends JFrame
 		{
 			JOptionPane.showMessageDialog(this, "There is no output to save",
 					"No Output", JOptionPane.INFORMATION_MESSAGE,
-					infoIcon);
+					attentionIcon);
 		}
 		catch (IOException iox)
 		{
@@ -549,9 +597,31 @@ public class StereoMatchingGUI extends JFrame
 		//TODO complete processShowStatusBar
 	}
 
-	private void clearTextArea()
+	private void processExitProgram()
 	{
-		outputTextArea.setText("");
+		if (JOptionPane.showConfirmDialog(this,
+				"Are you sure you want to exit?",
+				"Confirm Exit",
+		        JOptionPane.YES_NO_OPTION,
+		        JOptionPane.INFORMATION_MESSAGE,
+		        attentionIcon) == JOptionPane.YES_OPTION)
+		{
+		    System.exit(0);
+		}
+	}
+	
+	private void processClearOutput()
+	{
+		if (JOptionPane.showConfirmDialog(this,
+				"Are you sure you want to clear the output?",
+				"Confirm Clear Output",
+		        JOptionPane.YES_NO_OPTION,
+		        JOptionPane.INFORMATION_MESSAGE,
+		        attentionIcon) == JOptionPane.YES_OPTION)
+		{
+			outputTextArea.setText("");
+		}
+		
 	}
 
 	private String getCurrentDate()

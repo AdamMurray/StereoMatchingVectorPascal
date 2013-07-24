@@ -2,11 +2,9 @@ package stereomatching.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.*;
 import java.util.*;
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -34,6 +32,7 @@ public class StereoMatchingGUI extends JFrame
 	private JMenuBar menubar;
 	private JPanel north, center, south;
 	private JLabel leftImageFileNameLabel, rightImageFileNameLabel;
+	private JLabel timeForLastMatchLabel, averageMatchTimeLabel;
 	private JButton runButton, openLeftImageButton, openRightImageButton;
 	private JButton clearButton, saveButton, saveAsButton, exitButton;
 	private JTextArea outputTextArea, infoTextArea;
@@ -55,7 +54,12 @@ public class StereoMatchingGUI extends JFrame
 	private String leftImageFilePath, rightImageFilePath;
 	private String outputFileName;
 	private StereoMatchingController controller;
-
+	
+	private long matchStartTime, matchEndTime, matchTotalTime;
+	private long totalMatchTime;
+	private double averageMatchTime;
+	private int totalMatches;
+	
 	private final int GUI_WIDTH = 850;
 	private final int GUI_HEIGHT = 550;
 
@@ -151,11 +155,21 @@ public class StereoMatchingGUI extends JFrame
 		});
 
 		file.add(exitMenuItem);
-
 		menubar.add(file);
 
 		JMenu edit = new JMenu("Edit");
 
+		JMenuItem processClearInfoItem = new JMenuItem("Clear Info");
+		processClearInfoItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				processClearInfo();
+			}
+		});
+
+		edit.add(processClearInfoItem);
+		
 		JMenuItem processClearOutputItem = new JMenuItem("Clear Output");
 		processClearOutputItem.addActionListener(new ActionListener()
 		{
@@ -350,21 +364,6 @@ public class StereoMatchingGUI extends JFrame
 		centerRightTop.setBorder(new EtchedBorder());
 		centerRight.add(centerRightTop);
 		
-		JLabel lImageNameLabel, rImageNameLabel,
-		timeTakenForMatchLabel, averageMatchTimeLabel, numberOfMatchesLabel;
-		lImageNameLabel = new JLabel("Left image chosen: ");
-		lImageNameLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-		rImageNameLabel = new JLabel("Right image chosen: ");
-		numberOfMatchesLabel = new JLabel("Total matches done: ");
-		timeTakenForMatchLabel = new JLabel("Time taken for last match: ");
-		averageMatchTimeLabel = new JLabel("Average match time: ");
-		
-		centerRightTop.add(lImageNameLabel);
-		centerRightTop.add(rImageNameLabel);
-		centerRightTop.add(numberOfMatchesLabel);
-		centerRightTop.add(timeTakenForMatchLabel);
-		centerRightTop.add(averageMatchTimeLabel);
-		
 		JPanel centerRightBottom = new JPanel();
 		centerRightBottom.setLayout(new BorderLayout());
 		centerRightBottom.setBorder(new EtchedBorder());
@@ -388,17 +387,25 @@ public class StereoMatchingGUI extends JFrame
 	private void addComponentsToSouth()
 	{
 		south = new JPanel();
-		south.setLayout(new GridLayout(2, 1));
+		south.setLayout(new GridLayout(2, 2));
 		south.setBorder(new TitledBorder(new EtchedBorder()));
 
 		leftImageFileNameLabel = new JLabel("Left image file selected: ----");
-		leftImageFileNameLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
+		leftImageFileNameLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
 		south.add(leftImageFileNameLabel);
 
+		timeForLastMatchLabel = new JLabel("Time taken for last match: ----");
+		timeForLastMatchLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
+		south.add(timeForLastMatchLabel);
+		
 		rightImageFileNameLabel = new JLabel("Right image file selected: ----");
-		rightImageFileNameLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
+		rightImageFileNameLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
 		south.add(rightImageFileNameLabel);
-
+		
+		averageMatchTimeLabel = new JLabel("Average match time: ----");
+		averageMatchTimeLabel.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
+		south.add(averageMatchTimeLabel);
+		
 		this.add(south, BorderLayout.SOUTH);
 	}
 
@@ -431,7 +438,7 @@ public class StereoMatchingGUI extends JFrame
 			System.err.println("Welcome file cannot be opened");
 		}
 
-		infoTextArea.append("\nProgram started: " + getCurrentDate() + "\n\n");
+		infoTextArea.append("\n\tProgram started: " + getCurrentDate() + "\n\n");
 	}
 
 	private void processMatchImages()
@@ -441,21 +448,35 @@ public class StereoMatchingGUI extends JFrame
 			if (leftImageFileName.equals(null) || rightImageFileName.equals(null))
 				throw new NullPointerException();
 
-			outputTextArea.append("Matching the following images: " +
+			infoTextArea.append("Matching the following images: " +
 					"\n\tLeft image: " + leftImageFileName +
 					"\n\tRight image: " + rightImageFileName);
-			outputTextArea.append("\n\nMatching started: " + getCurrentDate() + "\n");
+			infoTextArea.append("\n\nMatching started: " + getCurrentDate() + "\n");
 
 			controller = new StereoMatchingController(
 					leftImageFilePath + leftImageFileName,
 					rightImageFilePath + rightImageFileName);
+			
+			matchStartTime = System.currentTimeMillis();
+			
 			controller.runVectorPascalCode();
+			
+			matchEndTime = System.currentTimeMillis();
 
 			for (String errorLine : controller.getErrorLines())
 				outputTextArea.append(errorLine + "\n");
 
 			for (String outputLine : controller.getOutputLines())
 				outputTextArea.append(outputLine + "\n");
+			
+			++totalMatches;
+			matchTotalTime = matchEndTime - matchStartTime;
+			totalMatchTime += matchTotalTime;
+			averageMatchTime = (totalMatchTime * 1.0) / totalMatches;
+			
+			averageMatchTimeLabel.setText(String.format("%s %.2fms", "Average match time: ", averageMatchTime));
+			timeForLastMatchLabel.setText(String.format("%s %dms", "Time taken for last match: ",
+					matchTotalTime));
 		}
 		catch (NullPointerException npx)
 		{			
@@ -489,7 +510,7 @@ public class StereoMatchingGUI extends JFrame
 		{
 			rightImageFilePath = rightImageChooser.getSelectedFile().getAbsolutePath();
 			rightImageFileName = rightImageChooser.getSelectedFile().getName();
-			rightImageFileNameLabel.setText("Right image file select: " + rightImageFileName);
+			rightImageFileNameLabel.setText("Right image file selected: " + rightImageFileName);
 		}
 	}
 
@@ -621,9 +642,21 @@ public class StereoMatchingGUI extends JFrame
 		{
 			outputTextArea.setText("");
 		}
-		
 	}
 
+	private void processClearInfo()
+	{
+		if (JOptionPane.showConfirmDialog(this,
+				"Are you sure you want to clear the information output?",
+				"Confirm Clear Output",
+		        JOptionPane.YES_NO_OPTION,
+		        JOptionPane.INFORMATION_MESSAGE,
+		        attentionIcon) == JOptionPane.YES_OPTION)
+		{
+			infoTextArea.setText("");
+		}
+	}
+	
 	private String getCurrentDate()
 	{
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");

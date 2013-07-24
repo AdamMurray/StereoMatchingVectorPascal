@@ -34,13 +34,21 @@ public class StereoMatchingGUI extends JFrame
 	private JMenuBar menubar;
 	private JPanel north, south;
 	private JLabel leftImageFileNameLabel, rightImageFileNameLabel;
-	private JButton runButton, openLeftImageButton, openRightImageButton, clearButton, saveButton;
+	private JButton runButton, openLeftImageButton, openRightImageButton;
+	private JButton clearButton, saveButton, saveAsButton, exitButton;
 	private JTextArea outputTextArea;
 	private JScrollPane textAreaScrollPane;
 	private JFileChooser leftImageChooser, rightImageChooser;
 
+	private ImageIcon clearIcon = new ImageIcon("./gui_icons/eraser.png");
 	private ImageIcon errorIcon = new ImageIcon("./gui_icons/close_delete.png");
+	private ImageIcon exitIcon = new ImageIcon("./gui_icons/delete_2.png");
 	private ImageIcon infoIcon = new ImageIcon("./gui_icons/information.png");
+	private ImageIcon openLeftIcon = new ImageIcon("./gui_icons/arrow_left.png");
+	private ImageIcon openRightIcon = new ImageIcon("./gui_icons/arrow_right.png");
+	private ImageIcon runIcon = new ImageIcon("./gui_icons/play.png");
+	private ImageIcon saveIcon = new ImageIcon("./gui_icons/save_diskette_floppy_disk.png");
+	private ImageIcon saveAsIcon = new ImageIcon("./gui_icons/save_as.png");
 
 	private String leftImageFileName, rightImageFileName;
 	private String leftImageFilePath, rightImageFilePath;
@@ -111,6 +119,7 @@ public class StereoMatchingGUI extends JFrame
 
 		file.addSeparator();
 		JMenuItem saveMenuItem = new JMenuItem("Save");
+		saveMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK));
 		saveMenuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
@@ -133,10 +142,8 @@ public class StereoMatchingGUI extends JFrame
 		file.add(saveAsMenuItem);
 
 		file.addSeparator();
-		//		ImageIcon exitIcon = new ImageIcon("./gui_icons/close_delete.png");
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.setMnemonic(KeyEvent.VK_E);
-		exitMenuItem.setToolTipText("Exit application");
 		exitMenuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
@@ -152,7 +159,6 @@ public class StereoMatchingGUI extends JFrame
 		JMenu edit = new JMenu("Edit");
 
 		JMenuItem clearTextAreaItem = new JMenuItem("Clear Output");
-		clearTextAreaItem.setToolTipText("Clears the output");
 		clearTextAreaItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
@@ -178,10 +184,23 @@ public class StereoMatchingGUI extends JFrame
 		view.add(showStatusBarItem);
 		menubar.add(view);
 
+		JMenu run = new JMenu("Run");
+
+		JMenuItem runMatchingItem = new JMenuItem("Run");
+		runMatchingItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				processMatchImages();
+			}
+		});
+
+		run.add(runMatchingItem);
+		menubar.add(run);
+
 		JMenu help = new JMenu("Help");
 
 		JMenuItem aboutMenuItem = new JMenuItem("About");
-		aboutMenuItem.setToolTipText("About application");
 		aboutMenuItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
@@ -201,116 +220,102 @@ public class StereoMatchingGUI extends JFrame
 		north = new JPanel();
 		north.setLayout(new FlowLayout((int) LEFT_ALIGNMENT));
 
-		BufferedImage runButtonIcon;
-		try
+
+		runButton = new JButton(runIcon);
+		runButton.setBorder(BorderFactory.createEmptyBorder());
+		runButton.setContentAreaFilled(false);
+		runButton.setToolTipText("Run Stereo Matching");
+		runButton.addActionListener(new ActionListener()
 		{
-			runButtonIcon = ImageIO.read(new File("./gui_icons/play.png"));
-			runButton = new JButton(new ImageIcon(runButtonIcon));
-			runButton.setBorder(BorderFactory.createEmptyBorder());
-			runButton.setContentAreaFilled(false);
-			runButton.setToolTipText("Press to initiate matching of selected stereo image pair");
-			runButton.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent event)
-				{				
-					processMatchImages();
-				}
-			});
-		}
-		catch (IOException iox)
-		{
-			iox.printStackTrace();
-		}
+			public void actionPerformed(ActionEvent event)
+			{				
+				processMatchImages();
+			}
+		});
 		north.add(runButton);
 
-		BufferedImage openLeftImageButtonIcon;
-		try
+
+		openLeftImageButton = new JButton(openLeftIcon);
+		openLeftImageButton.setBorder(BorderFactory.createEmptyBorder());
+		openLeftImageButton.setContentAreaFilled(false);
+		openLeftImageButton.setToolTipText("Open Left Image");
+		openLeftImageButton.addActionListener(new ActionListener()
 		{
-			openLeftImageButtonIcon = ImageIO.read(new File("./gui_icons/arrow_left.png"));
-			openLeftImageButton = new JButton(new ImageIcon(openLeftImageButtonIcon));
-			openLeftImageButton.setBorder(BorderFactory.createEmptyBorder());
-			openLeftImageButton.setContentAreaFilled(false);
-			openLeftImageButton.setToolTipText("Press to open left image of stereo pair");
-			openLeftImageButton.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent event)
-				{				
-					processLeftImageSelect();
-				}
-			});
-		}
-		catch (IOException iox)
-		{
-			iox.printStackTrace();
-		}
+			public void actionPerformed(ActionEvent event)
+			{				
+				processLeftImageSelect();
+			}
+		});
 		north.add(openLeftImageButton);
 
-		BufferedImage openRightImageButtonIcon;
-		try
+
+		openRightImageButton = new JButton(openRightIcon);
+		openRightImageButton.setBorder(BorderFactory.createEmptyBorder());
+		openRightImageButton.setContentAreaFilled(false);
+		openRightImageButton.setToolTipText("Open Right Image");
+		openRightImageButton.addActionListener(new ActionListener()
 		{
-			openRightImageButtonIcon = ImageIO.read(new File("./gui_icons/arrow_right.png"));
-			openRightImageButton = new JButton(new ImageIcon(openRightImageButtonIcon));
-			openRightImageButton.setBorder(BorderFactory.createEmptyBorder());
-			openRightImageButton.setContentAreaFilled(false);
-			openRightImageButton.setToolTipText("Press to open right image of stereo pair");
-			openRightImageButton.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent event)
-				{				
-					processRightImageSelect();
-				}
-			});
-		}
-		catch (IOException iox)
-		{
-			iox.printStackTrace();
-		}
+			public void actionPerformed(ActionEvent event)
+			{				
+				processRightImageSelect();
+			}
+		});
 		north.add(openRightImageButton);
 
-		BufferedImage clearButtonIcon;
-		try
+
+		clearButton = new JButton(clearIcon);
+		clearButton.setBorder(BorderFactory.createEmptyBorder());
+		clearButton.setContentAreaFilled(false);
+		clearButton.setToolTipText("Clear Output");
+		clearButton.addActionListener(new ActionListener()
 		{
-			clearButtonIcon = ImageIO.read(new File("./gui_icons/eraser.png"));
-			clearButton = new JButton(new ImageIcon(clearButtonIcon));
-			clearButton.setBorder(BorderFactory.createEmptyBorder());
-			clearButton.setContentAreaFilled(false);
-			clearButton.setToolTipText("Press to clear output");
-			clearButton.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent event)
-				{				
-					clearTextArea();
-				}
-			});
-		}
-		catch (IOException iox)
-		{
-			iox.printStackTrace();
-		}
+			public void actionPerformed(ActionEvent event)
+			{				
+				clearTextArea();
+			}
+		});
 		north.add(clearButton);
 
-		BufferedImage saveButtonIcon;
-		try
+
+		saveButton = new JButton(saveIcon);
+		saveButton.setBorder(BorderFactory.createEmptyBorder());
+		saveButton.setContentAreaFilled(false);
+		saveButton.setToolTipText("Save (Ctrl+S)");
+		saveButton.addActionListener(new ActionListener()
 		{
-			saveButtonIcon = ImageIO.read(new File("./gui_icons/save_as.png"));
-			saveButton = new JButton(new ImageIcon(saveButtonIcon));
-			saveButton.setBorder(BorderFactory.createEmptyBorder());
-			saveButton.setContentAreaFilled(false);
-			saveButton.setToolTipText("Press to save output");
-			saveButton.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent event)
-				{				
-					processSaveAsOutput();
-				}
-			});
-		}
-		catch (IOException iox)
-		{
-			iox.printStackTrace();
-		}
+			public void actionPerformed(ActionEvent event)
+			{				
+				processSaveAsOutput();
+			}
+		});
 		north.add(saveButton);
 
+
+		saveAsButton = new JButton(saveAsIcon);
+		saveAsButton.setBorder(BorderFactory.createEmptyBorder());
+		saveAsButton.setContentAreaFilled(false);
+		saveAsButton.setToolTipText("Save As...");
+		saveAsButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{				
+				processSaveAsOutput();
+			}
+		});
+		north.add(saveAsButton);
+
+		exitButton = new JButton(exitIcon);
+		exitButton.setBorder(BorderFactory.createEmptyBorder());
+		exitButton.setContentAreaFilled(false);
+		exitButton.setToolTipText("Exit");
+		exitButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{				
+				System.exit(0);
+			}
+		});
+		north.add(exitButton);
 
 		this.add(north, BorderLayout.NORTH);
 	}
@@ -321,7 +326,7 @@ public class StereoMatchingGUI extends JFrame
 		outputTextArea.setBackground(Color.BLACK);
 		outputTextArea.setForeground(Color.ORANGE);
 		outputTextArea.setEditable(false);
-		outputTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+		outputTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
 		outputTextArea.setWrapStyleWord(true);
 		outputTextArea.setLineWrap(true);
 
@@ -535,7 +540,8 @@ public class StereoMatchingGUI extends JFrame
 		String aboutDialog = "Stereo Image Matcher" +
 				"\nVersion: 0.1" +
 				"\n\nThis program is a user interface for use in matching a pair of stereo images.";
-		JOptionPane.showMessageDialog(this, aboutDialog, "About", JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(this, aboutDialog, "About", JOptionPane.INFORMATION_MESSAGE,
+				infoIcon);
 	}
 
 	private void processShowStatusBar()

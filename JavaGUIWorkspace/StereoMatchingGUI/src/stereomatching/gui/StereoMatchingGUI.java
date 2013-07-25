@@ -476,8 +476,8 @@ public class StereoMatchingGUI extends JFrame
 				throw new NullPointerException();
 
 			controller = new StereoMatchingController(
-					leftImageFilePath + leftImageFileName,
-					rightImageFilePath + rightImageFileName);
+					leftImageFilePath,
+					rightImageFilePath);
 
 			matchStartTime = System.currentTimeMillis();
 			controller.runVectorPascalCode();

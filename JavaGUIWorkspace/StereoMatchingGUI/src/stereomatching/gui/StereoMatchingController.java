@@ -11,10 +11,10 @@ import java.util.*;
  * @author Adam Murray
  *
  */
-public class StereoMatchingController
+public class StereoMatchingController extends Thread
 {
 	private String leftImageFileName, rightImageFileName;
-	private String runVectorPascalCode;
+	private String [] runVectorPascalCode;
 
 	private List<String> errorLines = new ArrayList<String>();
 	private List<String> outputLines = new ArrayList<String>();
@@ -38,17 +38,20 @@ public class StereoMatchingController
 	 * which in turn runs code written in Vector
 	 * Pascal that performs stereo matching on
 	 * the two images.
-	 */
-	public void runVectorPascalCode()
+	 */	
+	public void run()
 	{
 		try
 		{
 			String bashScriptLocation = "/home/adam/Dropbox/VectorPascal/MastersProjectPrograms/JavaGUIWorkspace/";
-			runVectorPascalCode = bashScriptLocation + "run_vector_pascal_code" + " " +
-					leftImageFileName + " " + rightImageFileName;
 
-			Runtime runtime = Runtime.getRuntime();
-			Process process = runtime.exec(runVectorPascalCode);
+			runVectorPascalCode = new String[3];
+			runVectorPascalCode[0] = bashScriptLocation + "run_vector_pascal_code";
+			runVectorPascalCode[1] = leftImageFileName;
+			runVectorPascalCode[2] = rightImageFileName;
+			
+			ProcessBuilder processBuilder = new ProcessBuilder(runVectorPascalCode);
+			Process process = processBuilder.start();
 
 			StreamGobbler errorGobbler = new 
 					StreamGobbler(process.getErrorStream(), "ERROR");            

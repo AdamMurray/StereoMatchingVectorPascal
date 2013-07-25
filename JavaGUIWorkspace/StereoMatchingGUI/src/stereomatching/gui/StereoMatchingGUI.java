@@ -533,9 +533,9 @@ public class StereoMatchingGUI extends JFrame
 			outputTextArea.append("Match number: " + totalMatches + "\n\n");
 			
 			controller = new StereoMatchingController(leftImageFilePath, rightImageFilePath);
-
+			
 			matchStartTime = System.currentTimeMillis();
-			controller.runVectorPascalCode();
+			controller.start();
 			matchEndTime = System.currentTimeMillis();
 
 			matchTotalTime = matchEndTime - matchStartTime;

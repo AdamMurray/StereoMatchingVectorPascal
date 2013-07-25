@@ -7,7 +7,7 @@ import java.text.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.*;
 
 /**
  * Class that defines a GUI for handling user input.
@@ -31,15 +31,17 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 @SuppressWarnings("serial")
 public class StereoMatchingGUI extends JFrame
 {
-	private JMenuBar menubar;
-	private JPanel north, center, south;
-	private JLabel leftImageFileNameLabel, rightImageFileNameLabel;
-	private JLabel timeForLastMatchLabel, averageMatchTimeLabel;
+	// GUI Components
 	private JButton runButton, openLeftImageButton, openRightImageButton;
 	private JButton clearButton, saveButton, saveAsButton, exitButton;
-	private JTextArea outputTextArea, infoTextArea, notesTextArea;
 	private JFileChooser leftImageChooser, rightImageChooser;
+	private JLabel leftImageFileNameLabel, rightImageFileNameLabel;
+	private JLabel timeForLastMatchLabel, averageMatchTimeLabel;
+	private JMenuBar menubar;
+	private JPanel north, center, south;	
+	private JTextArea outputTextArea, infoTextArea, notesTextArea;	
 
+	// GUI Image Icons
 	private ImageIcon attentionIcon = new ImageIcon("./gui_icons/attention.png");
 	private ImageIcon clearIcon = new ImageIcon("./gui_icons/eraser.png");
 	private ImageIcon errorIcon = new ImageIcon("./gui_icons/close_delete.png");
@@ -51,21 +53,32 @@ public class StereoMatchingGUI extends JFrame
 	private ImageIcon saveIcon = new ImageIcon("./gui_icons/save_diskette_floppy_disk.png");
 	private ImageIcon saveAsIcon = new ImageIcon("./gui_icons/save_as.png");
 
+	// File Names and Paths
 	private String leftImageFileName, rightImageFileName;
 	private String leftImageFilePath, rightImageFilePath;
-	private String outputFileName;
+	private String outputFileName = null;
+
+	// Stereo Matching Controller
 	private StereoMatchingController controller;
 
+	// File Name Filter for Choosing Files
 	private FileNameExtensionFilter fileNameFilter = new FileNameExtensionFilter(".bmp Images", "bmp");
 
+	// Variables for Match Calculations
 	private long matchStartTime, matchEndTime, matchTotalTime;
-	private long totalMatchTime;
+	private long totalTimeForMatches;
 	private double averageMatchTime;
 	private int totalMatches = 0;
 
+	// GUI Constants
 	private final int GUI_WIDTH = 850;
 	private final int GUI_HEIGHT = 650;
 
+	/**
+	 * Creates a new StereoMatchingGUI object,
+	 * initialises the user interface, and shows
+	 * a welcome screen.
+	 */
 	public StereoMatchingGUI()
 	{
 		initialiseUI();
@@ -73,6 +86,11 @@ public class StereoMatchingGUI extends JFrame
 		showWelcomeScreen();
 	}
 
+	/**
+	 * Initialises the user interface.
+	 * Sets default size, location and
+	 * behaviour.
+	 */
 	private void initialiseUI()
 	{
 		setTitle("Stereo Image Matcher v0.1");
@@ -81,11 +99,13 @@ public class StereoMatchingGUI extends JFrame
 		setLocationRelativeTo(null);
 		setLocationByPlatform(true);
 		setSize(GUI_WIDTH, GUI_HEIGHT);
-		setLocation(500, 100);
-		setResizable(true);
 		setVisible(true);
 	}
 
+	/**
+	 * Lays out the components in the
+	 * user interface.
+	 */
 	private void layoutComponents()
 	{
 		addMenuBar();
@@ -94,10 +114,15 @@ public class StereoMatchingGUI extends JFrame
 		addComponentsToSouth();
 	}
 
+	/**
+	 * Creates a menu bar for the user interface.
+	 */
 	private void addMenuBar()
 	{
 		menubar = new JMenuBar();
 
+		// Creates and adds items to the 'File'
+		// section of the menu
 		JMenu file = new JMenu("File");
 		file.setMnemonic(KeyEvent.VK_F);
 
@@ -109,7 +134,6 @@ public class StereoMatchingGUI extends JFrame
 				processLeftImageSelect();
 			}
 		});
-
 		file.add(openLeftImageMenuItem);
 
 		JMenuItem openRightImageMenuItem = new JMenuItem("Open right image...");
@@ -120,10 +144,10 @@ public class StereoMatchingGUI extends JFrame
 				processRightImageSelect();
 			}
 		});
-
 		file.add(openRightImageMenuItem);
 
 		file.addSeparator();
+
 		JMenuItem saveMenuItem = new JMenuItem("Save");
 		saveMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK));
 		saveMenuItem.addActionListener(new ActionListener()
@@ -133,7 +157,6 @@ public class StereoMatchingGUI extends JFrame
 				processSave();
 			}
 		});
-
 		file.add(saveMenuItem);
 
 		JMenuItem saveAsMenuItem = new JMenuItem("Save As...");
@@ -144,10 +167,10 @@ public class StereoMatchingGUI extends JFrame
 				processSaveAs();
 			}
 		});
-
 		file.add(saveAsMenuItem);
 
 		file.addSeparator();
+
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.setMnemonic(KeyEvent.VK_E);
 		exitMenuItem.addActionListener(new ActionListener()
@@ -157,10 +180,12 @@ public class StereoMatchingGUI extends JFrame
 				processExitProgram();
 			}
 		});
-
 		file.add(exitMenuItem);
+
 		menubar.add(file);
 
+		// Creates and adds items to the 'Edit'
+		// section of the menu
 		JMenu edit = new JMenu("Edit");
 
 		JMenuItem processClearInfoItem = new JMenuItem("Clear Info");
@@ -171,7 +196,6 @@ public class StereoMatchingGUI extends JFrame
 				processClearInfo();
 			}
 		});
-
 		edit.add(processClearInfoItem);
 
 		JMenuItem processClearOutputItem = new JMenuItem("Clear Output");
@@ -182,10 +206,11 @@ public class StereoMatchingGUI extends JFrame
 				processClearOutput();
 			}
 		});
-
 		edit.add(processClearOutputItem);
 		menubar.add(edit);
 
+		// Creates and adds items to the 'View'
+		// section of the menu
 		JMenu view = new JMenu("View");
 
 		JMenuItem showStatusBarItem = new JMenuItem("Show Status Bar");
@@ -196,10 +221,12 @@ public class StereoMatchingGUI extends JFrame
 				processShowStatusBar();
 			}
 		});
-
 		view.add(showStatusBarItem);
+
 		menubar.add(view);
 
+		// Creates and adds items to the 'Run'
+		// section of the menu
 		JMenu run = new JMenu("Run");
 
 		JMenuItem runMatchingItem = new JMenuItem("Run");
@@ -210,10 +237,12 @@ public class StereoMatchingGUI extends JFrame
 				processMatchImages();
 			}
 		});
-
 		run.add(runMatchingItem);
+
 		menubar.add(run);
 
+		// Creates and adds items to the 'Help'
+		// section of the menu
 		JMenu help = new JMenu("Help");
 
 		JMenuItem helpPagesMenuItem = new JMenuItem("Help Pages");
@@ -224,11 +253,12 @@ public class StereoMatchingGUI extends JFrame
 				processShowHelpPages();
 			}
 		});
-
 		help.add(helpPagesMenuItem);
+
 		menubar.add(help);
-		
+
 		help.addSeparator();
+
 		JMenuItem aboutMenuItem = new JMenuItem("About");
 		aboutMenuItem.addActionListener(new ActionListener()
 		{
@@ -237,18 +267,21 @@ public class StereoMatchingGUI extends JFrame
 				processShowAboutDialog();
 			}
 		});
-
 		help.add(aboutMenuItem);
+
 		menubar.add(help);
 
 		setJMenuBar(menubar);
 	}
 
+	/**
+	 * Creates the components to be added
+	 * to the top section of the user interface.
+	 */
 	private void addComponentsToNorth()
 	{
 		north = new JPanel();
 		north.setLayout(new FlowLayout((int) LEFT_ALIGNMENT));
-
 
 		runButton = new JButton(runIcon);
 		runButton.setBorder(BorderFactory.createEmptyBorder());
@@ -263,7 +296,6 @@ public class StereoMatchingGUI extends JFrame
 		});
 		north.add(runButton);
 
-
 		openLeftImageButton = new JButton(openLeftIcon);
 		openLeftImageButton.setBorder(BorderFactory.createEmptyBorder());
 		openLeftImageButton.setContentAreaFilled(false);
@@ -277,7 +309,6 @@ public class StereoMatchingGUI extends JFrame
 		});
 		north.add(openLeftImageButton);
 
-
 		openRightImageButton = new JButton(openRightIcon);
 		openRightImageButton.setBorder(BorderFactory.createEmptyBorder());
 		openRightImageButton.setContentAreaFilled(false);
@@ -290,7 +321,6 @@ public class StereoMatchingGUI extends JFrame
 			}
 		});
 		north.add(openRightImageButton);
-
 
 		clearButton = new JButton(clearIcon);
 		clearButton.setBorder(BorderFactory.createEmptyBorder());
@@ -306,7 +336,6 @@ public class StereoMatchingGUI extends JFrame
 		});
 		north.add(clearButton);
 
-
 		saveButton = new JButton(saveIcon);
 		saveButton.setBorder(BorderFactory.createEmptyBorder());
 		saveButton.setContentAreaFilled(false);
@@ -315,11 +344,10 @@ public class StereoMatchingGUI extends JFrame
 		{
 			public void actionPerformed(ActionEvent event)
 			{				
-				processSaveAs();
+				processSave();
 			}
 		});
 		north.add(saveButton);
-
 
 		saveAsButton = new JButton(saveAsIcon);
 		saveAsButton.setBorder(BorderFactory.createEmptyBorder());
@@ -350,6 +378,10 @@ public class StereoMatchingGUI extends JFrame
 		this.add(north, BorderLayout.NORTH);
 	}
 
+	/**
+	 * Creates the components to be added to the
+	 * middle section of the user interface.
+	 */
 	private void addComponentsToCenter()
 	{
 		center = new JPanel();
@@ -428,6 +460,10 @@ public class StereoMatchingGUI extends JFrame
 		this.add(center, BorderLayout.CENTER);
 	}
 
+	/**
+	 * Creates the components to be added to the
+	 * bottom section of the user interface.
+	 */
 	private void addComponentsToSouth()
 	{
 		south = new JPanel();
@@ -453,6 +489,10 @@ public class StereoMatchingGUI extends JFrame
 		this.add(south, BorderLayout.SOUTH);
 	}
 
+	/**
+	 * Creates a welcome screen that is shown
+	 * when the program is started.
+	 */
 	private void showWelcomeScreen()
 	{
 		String aboutDialog = "Welcome to the Stereo Image Matcher.\n\n" +
@@ -466,43 +506,49 @@ public class StereoMatchingGUI extends JFrame
 				infoIcon);
 	}
 
+	/**
+	 * Handles running the image matching program
+	 * on the image files chosen by the user.
+	 */
 	private void processMatchImages()
 	{
 		try
 		{
-			++totalMatches;
-
 			if (leftImageFileName.equals(null) || rightImageFileName.equals(null))
 				throw new NullPointerException();
 
-			controller = new StereoMatchingController(
-					leftImageFilePath,
-					rightImageFilePath);
+			++totalMatches;
+
+			String outputDelimiter = "_________________________";
+
+			infoTextArea.append(outputDelimiter + outputDelimiter + "\n\n");
+			infoTextArea.append("Match number: " + totalMatches + "\n\n");
+			infoTextArea.append("Matching the following images: " +
+					"\n\tLeft image: " + leftImageFileName +
+					"\n\tRight image: " + rightImageFileName);
+
+			infoTextArea.append("\n\nMatching started: " + getCurrentDate() + "\n");
+
+			outputTextArea.append(outputDelimiter + outputDelimiter + "\n\n");
+			outputTextArea.append("Match number: " + totalMatches + "\n\n");
+			
+			controller = new StereoMatchingController(leftImageFilePath, rightImageFilePath);
 
 			matchStartTime = System.currentTimeMillis();
 			controller.runVectorPascalCode();
 			matchEndTime = System.currentTimeMillis();
 
 			matchTotalTime = matchEndTime - matchStartTime;
-			totalMatchTime += matchTotalTime;
-			averageMatchTime = (totalMatchTime * 1.0) / totalMatches;
+			totalTimeForMatches += matchTotalTime;
+			averageMatchTime = (totalTimeForMatches * 1.0) / totalMatches;
 
 			averageMatchTimeLabel.setText(String.format("%s %.2fms", "Average match time: ", averageMatchTime));
 			timeForLastMatchLabel.setText(String.format("%s %dms", "Time taken for last match: ",
 					matchTotalTime));
-
-			infoTextArea.append("Match number: " + totalMatches + "\n\n");
-
-			infoTextArea.append("Matching the following images: " +
-					"\n\tLeft image: " + leftImageFileName +
-					"\n\tRight image: " + rightImageFileName);
-			infoTextArea.append("\n\nMatching started: " + getCurrentDate() + "\n");
+			
 			infoTextArea.append("Time to complete match: " + matchTotalTime + "ms\n");
 
-			String outputDelimiter = "_________________________";
-			infoTextArea.append(outputDelimiter + outputDelimiter + "\n\n");
-
-			outputTextArea.append("Match number: " + totalMatches + "\n\n");
+			infoTextArea.append(outputDelimiter + outputDelimiter + "\n\n");			
 
 			for (String errorLine : controller.getErrorLines())
 				outputTextArea.append(errorLine + "\n");
@@ -520,6 +566,10 @@ public class StereoMatchingGUI extends JFrame
 		}
 	}
 
+	/**
+	 * Handles user selection of the left
+	 * stereo image.
+	 */
 	private void processLeftImageSelect()
 	{
 		leftImageChooser = new JFileChooser();
@@ -536,6 +586,10 @@ public class StereoMatchingGUI extends JFrame
 		}
 	}
 
+	/**
+	 * Handles user selection of the right
+	 * stereo image.
+	 */
 	private void processRightImageSelect()
 	{
 		rightImageChooser = new JFileChooser();
@@ -552,6 +606,12 @@ public class StereoMatchingGUI extends JFrame
 		}
 	}
 
+	/**
+	 * Handles saving the program output and notes
+	 * taken by the user during running of the program.
+	 * If a save has already taken place, the new save
+	 * will write to the previously chosen file.
+	 */
 	private void processSave()
 	{
 		FileWriter outputFileWriter = null;
@@ -572,8 +632,12 @@ public class StereoMatchingGUI extends JFrame
 						throw new IllegalArgumentException();
 
 					outputFileWriter = new FileWriter(outputFileName);
-
 					outputFileWriter.write(createReport());
+					
+					JOptionPane.showMessageDialog(this,
+							"Report saved to file: '" + outputFileName + "'",
+							"Report Saved", JOptionPane.INFORMATION_MESSAGE,
+							infoIcon);
 				}
 			}
 			finally
@@ -595,9 +659,14 @@ public class StereoMatchingGUI extends JFrame
 		}
 	}
 
+	/**
+	 * Handles saving the program output and notes
+	 * taken by the user during running of the program.
+	 * Even if a save has already taken place, the new
+	 * save can write to a different file.
+	 */
 	private void processSaveAs()
 	{
-		outputFileName = null;
 		FileWriter outputFileWriter = null;
 
 		try
@@ -619,6 +688,11 @@ public class StereoMatchingGUI extends JFrame
 					File saveFile = fileSaveChooser.getSelectedFile();
 					outputFileWriter = new FileWriter(saveFile);
 					outputFileWriter.write(createReport());
+					
+					JOptionPane.showMessageDialog(this,
+							"Report saved to file: '" + outputFileName + "'",
+							"Report Saved", JOptionPane.INFORMATION_MESSAGE,
+							infoIcon);
 				}
 			}
 			finally
@@ -646,6 +720,14 @@ public class StereoMatchingGUI extends JFrame
 		}
 	}
 
+	/**
+	 * Creates a report from the program output,
+	 * program information, and notes taken by
+	 * the user, which is then written to a file
+	 * when a Save or Save As is called.
+	 * 
+	 * @return report - the report generated.
+	 */
 	private String createReport()
 	{
 		String report;
@@ -670,6 +752,9 @@ public class StereoMatchingGUI extends JFrame
 		return report;
 	}
 
+	/**
+	 * Displays information about the program.
+	 */
 	private void processShowAboutDialog()
 	{
 		String aboutDialog = "Stereo Image Matcher\n" +
@@ -681,16 +766,22 @@ public class StereoMatchingGUI extends JFrame
 				infoIcon);
 	}
 
-	private void processShowStatusBar()
-	{
-		//TODO complete processShowStatusBar
-	}
-
+	/**
+	 * Shows help pages on the program.
+	 */
 	private void processShowHelpPages()
 	{
 		//TODO complete help pages
 	}
 	
+	private void processShowStatusBar()
+	{
+		//TODO complete processShowStatusBar
+	}
+
+	/**
+	 * Handles exit from the program.
+	 */
 	private void processExitProgram()
 	{
 		if (JOptionPane.showConfirmDialog(this,
@@ -704,6 +795,10 @@ public class StereoMatchingGUI extends JFrame
 		}
 	}
 
+	/**
+	 * Clears text from the program output
+	 * section of the user interface.
+	 */
 	private void processClearOutput()
 	{
 		if (JOptionPane.showConfirmDialog(this,
@@ -717,6 +812,10 @@ public class StereoMatchingGUI extends JFrame
 		}
 	}
 
+	/**
+	 * Clears text from the program information
+	 * section of the user interface.
+	 */
 	private void processClearInfo()
 	{
 		if (JOptionPane.showConfirmDialog(this,
@@ -730,6 +829,13 @@ public class StereoMatchingGUI extends JFrame
 		}
 	}
 
+	/**
+	 * Returns the current date and time as a
+	 * formatted string in the form:
+	 * DD/MM/YYYY HH:MM:SS.
+	 * 
+	 * @return dateString - a string representing current date and time.
+	 */
 	private String getCurrentDate()
 	{
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -741,8 +847,6 @@ public class StereoMatchingGUI extends JFrame
 	/**
 	 * Main method.
 	 * Causes the EDT to be invoked.
-	 * 
-	 * @param args
 	 */
 	public static void main(String[] args)
 	{

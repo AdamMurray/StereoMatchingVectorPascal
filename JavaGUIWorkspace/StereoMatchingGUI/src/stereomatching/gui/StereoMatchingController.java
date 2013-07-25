@@ -19,12 +19,26 @@ public class StereoMatchingController
 	private List<String> errorLines = new ArrayList<String>();
 	private List<String> outputLines = new ArrayList<String>();
 
+	/**
+	 * Creates a StereoMatchingController object using
+	 * two image file names chosen by the user.
+	 * 
+	 * @param leftImage - file name of the left stereo image.
+	 * @param rightImage - file name of the right stereo image.
+	 */
 	public StereoMatchingController(String leftImage, String rightImage)
 	{
 		leftImageFileName = leftImage;
 		rightImageFileName = rightImage;
 	}
 
+	/**
+	 * Runs a bash script which is passed the left
+	 * and right image file names as parameters,
+	 * which in turn runs code written in Vector
+	 * Pascal that performs stereo matching on
+	 * the two images.
+	 */
 	public void runVectorPascalCode()
 	{
 		try
@@ -36,19 +50,15 @@ public class StereoMatchingController
 			Runtime runtime = Runtime.getRuntime();
 			Process process = runtime.exec(runVectorPascalCode);
 
-			// any error message?
 			StreamGobbler errorGobbler = new 
 					StreamGobbler(process.getErrorStream(), "ERROR");            
 
-			// any output?
 			StreamGobbler outputGobbler = new 
 					StreamGobbler(process.getInputStream(), ">");
 
-			// kick them off
 			errorGobbler.start();
 			outputGobbler.start();
 
-			// any error???
 			int exitVal = process.waitFor();
 			System.out.println("ExitValue: " + exitVal);
 			

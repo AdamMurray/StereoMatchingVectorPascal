@@ -127,7 +127,7 @@ procedure applyConvolution(var p : image; var K : matrix);
 	       r := preMultPointer^[l,m];
 	       for row := 0 to j - 1 do
 		  p[n,row] := p[n,row] + r^[n,(row + l - j - 1)];
-	       for row := p.maxrow+j + 1 to p.maxrow do
+	       for row := p.maxrow + j + 1 to p.maxrow do
 		  p[n,row] := p[n,row] + r^[n,(row + l - j - 1)];
 	       for col := 0 to i - 1 do
 		  for row := 0 to p.maxrow do

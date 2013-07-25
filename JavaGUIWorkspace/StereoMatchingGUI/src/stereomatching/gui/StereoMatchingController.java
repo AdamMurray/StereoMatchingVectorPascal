@@ -1,6 +1,6 @@
 package stereomatching.gui;
 
-import java.util.*;
+import javax.swing.*;
 
 /**
  * Class that handles processing information
@@ -13,11 +13,10 @@ import java.util.*;
  */
 public class StereoMatchingController extends Thread
 {
+	private JTextArea outputTextArea;
+	
 	private String leftImageFileName, rightImageFileName;
 	private String [] runVectorPascalCode;
-
-	private List<String> errorLines = new ArrayList<String>();
-	private List<String> outputLines = new ArrayList<String>();
 
 	/**
 	 * Creates a StereoMatchingController object using
@@ -26,10 +25,13 @@ public class StereoMatchingController extends Thread
 	 * @param leftImage - file name of the left stereo image.
 	 * @param rightImage - file name of the right stereo image.
 	 */
-	public StereoMatchingController(String leftImage, String rightImage)
+	public StereoMatchingController(String leftImage,
+			String rightImage,
+			JTextArea output)
 	{
 		leftImageFileName = leftImage;
 		rightImageFileName = rightImage;
+		outputTextArea = output;
 	}
 
 	/**
@@ -49,32 +51,25 @@ public class StereoMatchingController extends Thread
 			runVectorPascalCode[0] = bashScriptLocation + "run_vector_pascal_code";
 			runVectorPascalCode[1] = leftImageFileName;
 			runVectorPascalCode[2] = rightImageFileName;
-			
+
 			ProcessBuilder processBuilder = new ProcessBuilder(runVectorPascalCode);
 			Process process = processBuilder.start();
 
 			StreamGobbler errorGobbler = new 
-					StreamGobbler(process.getErrorStream(), "ERROR");            
+					StreamGobbler(process.getErrorStream(), "ERROR", outputTextArea);            
 
 			StreamGobbler outputGobbler = new 
-					StreamGobbler(process.getInputStream(), ">");
+					StreamGobbler(process.getInputStream(), ">", outputTextArea);
 
 			errorGobbler.start();
 			outputGobbler.start();
 
 			int exitVal = process.waitFor();
 			System.out.println("ExitValue: " + exitVal);
-			
-			errorLines = errorGobbler.getLines();
-			outputLines = outputGobbler.getLines();
 		}
 		catch (Throwable t)
 		{
 			t.printStackTrace();
 		}
 	}
-
-	public List<String> getErrorLines() { return errorLines; }
-
-	public List<String> getOutputLines() { return outputLines; }
 }

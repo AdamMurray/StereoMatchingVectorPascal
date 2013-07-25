@@ -532,7 +532,10 @@ public class StereoMatchingGUI extends JFrame
 			outputTextArea.append(outputDelimiter + outputDelimiter + "\n\n");
 			outputTextArea.append("Match number: " + totalMatches + "\n\n");
 			
-			controller = new StereoMatchingController(leftImageFilePath, rightImageFilePath);
+			controller = new StereoMatchingController(
+					leftImageFilePath,
+					rightImageFilePath,
+					outputTextArea);
 			
 			matchStartTime = System.currentTimeMillis();
 			controller.start();
@@ -548,13 +551,7 @@ public class StereoMatchingGUI extends JFrame
 			
 			infoTextArea.append("Time to complete match: " + matchTotalTime + "ms\n");
 
-			infoTextArea.append(outputDelimiter + outputDelimiter + "\n\n");			
-
-			for (String errorLine : controller.getErrorLines())
-				outputTextArea.append(errorLine + "\n");
-
-			for (String outputLine : controller.getOutputLines())
-				outputTextArea.append(outputLine + "\n");
+			infoTextArea.append(outputDelimiter + outputDelimiter + "\n\n");
 
 			outputTextArea.append(outputDelimiter + outputDelimiter + "\n\n");
 		}

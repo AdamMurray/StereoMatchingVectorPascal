@@ -1,7 +1,7 @@
 package stereomatching.gui;
 
 import java.io.*;
-import java.util.*;
+import javax.swing.*;
 
 /*
  * Class to handle the standard error and standard input streams.
@@ -10,15 +10,20 @@ import java.util.*;
  */
 class StreamGobbler extends Thread
 {
+	private JTextArea output;
+	
 	private InputStream inputStream;
 	private String type;
 	private String line;
-	private List<String> lines = new ArrayList<String>();
 
-	public StreamGobbler(InputStream inputStream, String type)
+	public StreamGobbler(
+			InputStream inputStream,
+			String type,
+			JTextArea output)
 	{
 		this.inputStream = inputStream;
 		this.type = type;
+		this.output = output;
 	}
 
 	public void run()
@@ -30,7 +35,7 @@ class StreamGobbler extends Thread
 			line = null;
 			while ((line = bufferedReader.readLine()) != null)
 			{
-				lines.add(type + " " + line);
+				output.append(type + " " + line + "\n");
 			}
 		}
 		catch (IOException iox)
@@ -38,6 +43,4 @@ class StreamGobbler extends Thread
 			iox.printStackTrace();
 		}
 	}
-
-	public List<String> getLines() { return lines; }
 }

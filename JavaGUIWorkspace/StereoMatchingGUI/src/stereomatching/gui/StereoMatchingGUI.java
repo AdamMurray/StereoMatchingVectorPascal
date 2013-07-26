@@ -101,7 +101,7 @@ public class StereoMatchingGUI extends JFrame
 		setTitle("Stereo Image Matcher v0.1");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();
-		setLocationRelativeTo(null);
+		setLocationRelativeTo(this);
 		setLocationByPlatform(true);
 		setSize(GUI_WIDTH, GUI_HEIGHT);
 		setVisible(true);
@@ -506,7 +506,7 @@ public class StereoMatchingGUI extends JFrame
 		progressBarFrame.setLocationRelativeTo(this);
 		progressBarFrame.getContentPane();
 		progressBarFrame.pack();
-		progressBarFrame.setSize(150, 60);
+		progressBarFrame.setSize(200, 40);
 		progressBarFrame.add(progressBar);
 	}
 
@@ -585,10 +585,17 @@ public class StereoMatchingGUI extends JFrame
 		{
 			setProgress(100);
 			Toolkit.getDefaultToolkit().beep();
-			runButton.setEnabled(true);
 			setCursor(null);
 			System.out.println("Finished execution!");
 			progressBarFrame.dispose();
+			
+			runButton.setEnabled(true);
+			openLeftImageButton.setEnabled(true);
+			openRightImageButton.setEnabled(true);
+			clearButton.setEnabled(true);
+			saveButton.setEnabled(true);
+			saveAsButton.setEnabled(true);
+			exitButton.setEnabled(true);
 		}
 	}
 
@@ -604,20 +611,24 @@ public class StereoMatchingGUI extends JFrame
 				throw new NullPointerException();
 
 			++totalMatches;
-
-			String outputDelimiter = "####################";
-
-			infoTextArea.append("Match number: " + totalMatches + "\n\n");
+			
+			infoTextArea.append("##### Match number: " + totalMatches + " #####\n\n");
 			infoTextArea.append("Matching the following images: " +
 					"\n\tLeft image: " + leftImageFileName +
 					"\n\tRight image: " + rightImageFileName);
 
 			infoTextArea.append("\n\nMatching started: " + getCurrentDate() + "\n");
 
-			outputTextArea.append("\nMatch number: " + totalMatches + "\n\n");		
+			outputTextArea.append("\n##### Match number: " + totalMatches + " #####\n\n");		
 
 
 			runButton.setEnabled(false);
+			openLeftImageButton.setEnabled(false);
+			openRightImageButton.setEnabled(false);
+			clearButton.setEnabled(false);
+			saveButton.setEnabled(false);
+			saveAsButton.setEnabled(false);
+			exitButton.setEnabled(false);
 			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 			progressBar.setIndeterminate(true);

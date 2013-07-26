@@ -519,9 +519,8 @@ public class StereoMatchingGUI extends JFrame
 
 			++totalMatches;
 
-			String outputDelimiter = "_________________________";
-
-			infoTextArea.append(outputDelimiter + outputDelimiter + "\n\n");
+			String outputDelimiter = "####################";
+			
 			infoTextArea.append("Match number: " + totalMatches + "\n\n");
 			infoTextArea.append("Matching the following images: " +
 					"\n\tLeft image: " + leftImageFileName +
@@ -529,8 +528,7 @@ public class StereoMatchingGUI extends JFrame
 
 			infoTextArea.append("\n\nMatching started: " + getCurrentDate() + "\n");
 
-			outputTextArea.append(outputDelimiter + outputDelimiter + "\n\n");
-			outputTextArea.append("Match number: " + totalMatches + "\n\n");
+			outputTextArea.append("\nMatch number: " + totalMatches + "\n\n");
 			
 			controller = new StereoMatchingController(
 					leftImageFilePath,
@@ -538,28 +536,46 @@ public class StereoMatchingGUI extends JFrame
 					outputTextArea);
 			
 			matchStartTime = System.currentTimeMillis();
+			
 			controller.start();
-			matchEndTime = System.currentTimeMillis();
+			
+			boolean finished = false;
+			while (!finished)
+			{
+				if (controller.isAlive())
+				{
+					System.out.println("Thread not finished");
+					long delayMillis = 2000;
+					controller.join(delayMillis);
+				}
+				else
+				{
+					finished = true;
+					matchEndTime = System.currentTimeMillis();
+				}
+			}			
 
 			matchTotalTime = matchEndTime - matchStartTime;
 			totalTimeForMatches += matchTotalTime;
 			averageMatchTime = (totalTimeForMatches * 1.0) / totalMatches;
 
-			averageMatchTimeLabel.setText(String.format("%s %.2fms", "Average match time: ", averageMatchTime));
-			timeForLastMatchLabel.setText(String.format("%s %dms", "Time taken for last match: ",
-					matchTotalTime));
+			averageMatchTimeLabel.setText(String.format("%s %.2fs", "Average match time: ", averageMatchTime / 1000.0));
+			timeForLastMatchLabel.setText(String.format("%s %.2fs", "Time taken for last match: ", matchTotalTime / 1000.0));
 			
-			infoTextArea.append("Time to complete match: " + matchTotalTime + "ms\n");
+			infoTextArea.append("Time to complete match: " + matchTotalTime / 1000.0 + "s\n\n");
 
 			infoTextArea.append(outputDelimiter + outputDelimiter + "\n\n");
-
-			outputTextArea.append(outputDelimiter + outputDelimiter + "\n\n");
 		}
 		catch (NullPointerException npx)
 		{			
 			JOptionPane.showMessageDialog(this, "You must specify two images to be matched",
 					"Error", JOptionPane.ERROR_MESSAGE,
 					errorIcon);
+		}
+		catch (InterruptedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -780,7 +796,7 @@ public class StereoMatchingGUI extends JFrame
 	 * Handles exit from the program.
 	 */
 	private void processExitProgram()
-	{
+	{		
 		if (JOptionPane.showConfirmDialog(this,
 				"Are you sure you want to exit?",
 				"Confirm Exit",

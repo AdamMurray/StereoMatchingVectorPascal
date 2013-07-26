@@ -51,10 +51,10 @@ public class StereoMatchingController extends Thread
 			runVectorPascalCode[0] = bashScriptLocation + "run_vector_pascal_code";
 			runVectorPascalCode[1] = leftImageFileName;
 			runVectorPascalCode[2] = rightImageFileName;
-
+			
 			ProcessBuilder processBuilder = new ProcessBuilder(runVectorPascalCode);
 			Process process = processBuilder.start();
-
+			
 			StreamGobbler errorGobbler = new 
 					StreamGobbler(process.getErrorStream(), "ERROR", outputTextArea);            
 
@@ -63,7 +63,7 @@ public class StereoMatchingController extends Thread
 
 			errorGobbler.start();
 			outputGobbler.start();
-
+			
 			int exitVal = process.waitFor();
 			System.out.println("ExitValue: " + exitVal);
 		}

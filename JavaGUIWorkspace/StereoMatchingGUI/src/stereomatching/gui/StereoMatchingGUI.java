@@ -2,6 +2,7 @@ package stereomatching.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.*;
 import java.io.*;
 import java.text.*;
 import java.util.*;
@@ -38,7 +39,8 @@ public class StereoMatchingGUI extends JFrame
 	private JLabel leftImageFileNameLabel, rightImageFileNameLabel;
 	private JLabel timeForLastMatchLabel, averageMatchTimeLabel;
 	private JMenuBar menubar;
-	private JPanel north, center, south;	
+	private JPanel north, center, south;
+	private JProgressBar progressBar;
 	private JTextArea outputTextArea, infoTextArea, notesTextArea;	
 
 	// GUI Image Icons
@@ -73,6 +75,9 @@ public class StereoMatchingGUI extends JFrame
 	// GUI Constants
 	private final int GUI_WIDTH = 850;
 	private final int GUI_HEIGHT = 650;
+
+	private Task task;
+	private JFrame progressBarFrame;
 
 	/**
 	 * Creates a new StereoMatchingGUI object,
@@ -112,6 +117,7 @@ public class StereoMatchingGUI extends JFrame
 		addComponentsToNorth();
 		addComponentsToCenter();
 		addComponentsToSouth();
+		addProgressBar();
 	}
 
 	/**
@@ -489,6 +495,21 @@ public class StereoMatchingGUI extends JFrame
 		this.add(south, BorderLayout.SOUTH);
 	}
 
+	private void addProgressBar()
+	{
+		progressBar = new JProgressBar(0, 100);
+		progressBar.setValue(0);
+		progressBar.setStringPainted(true);
+
+		progressBarFrame = new JFrame();
+		progressBarFrame.setUndecorated(true);
+		progressBarFrame.setLocationRelativeTo(this);
+		progressBarFrame.getContentPane();
+		progressBarFrame.pack();
+		progressBarFrame.setSize(150, 60);
+		progressBarFrame.add(progressBar);
+	}
+
 	/**
 	 * Creates a welcome screen that is shown
 	 * when the program is started.
@@ -506,6 +527,71 @@ public class StereoMatchingGUI extends JFrame
 				infoIcon);
 	}
 
+	class Task extends SwingWorker<Void, Void>
+	{
+		@Override
+		public Void doInBackground()
+		{
+			progressBarFrame.setVisible(true);
+			
+			matchStartTime = System.currentTimeMillis();
+
+			controller = new StereoMatchingController(
+					leftImageFilePath,
+					rightImageFilePath,
+					outputTextArea);
+
+			controller.start();
+			
+			int progress = 0;			
+			setProgress(0);
+
+			boolean finished = false;
+			while (!finished)
+			{
+				if (controller.isAlive())
+				{
+					System.out.println("Thread not finished");
+					long delayMillis = 2000;
+					try
+					{
+						controller.join(delayMillis);
+					}
+					catch (InterruptedException e) {e.printStackTrace();}
+
+					progress += 4;
+					setProgress(Math.min(progress, 100));
+				}
+				else
+				{
+					finished = true;
+					matchEndTime = System.currentTimeMillis();
+					matchTotalTime = matchEndTime - matchStartTime;
+					totalTimeForMatches += matchTotalTime;
+					averageMatchTime = (totalTimeForMatches * 1.0) / totalMatches;
+
+					averageMatchTimeLabel.setText(String.format("%s %.2fs", "Average match time: ", averageMatchTime / 1000.0));
+					timeForLastMatchLabel.setText(String.format("%s %.2fs", "Time taken for last match: ", matchTotalTime / 1000.0));
+
+					infoTextArea.append("Time to complete match: " + matchTotalTime / 1000.0 + "s\n\n");
+				}
+			}	
+
+			return null;
+		}
+
+		@Override
+		public void done()
+		{
+			setProgress(100);
+			Toolkit.getDefaultToolkit().beep();
+			runButton.setEnabled(true);
+			setCursor(null);
+			System.out.println("Finished execution!");
+			progressBarFrame.dispose();
+		}
+	}
+
 	/**
 	 * Handles running the image matching program
 	 * on the image files chosen by the user.
@@ -520,7 +606,7 @@ public class StereoMatchingGUI extends JFrame
 			++totalMatches;
 
 			String outputDelimiter = "####################";
-			
+
 			infoTextArea.append("Match number: " + totalMatches + "\n\n");
 			infoTextArea.append("Matching the following images: " +
 					"\n\tLeft image: " + leftImageFileName +
@@ -528,54 +614,31 @@ public class StereoMatchingGUI extends JFrame
 
 			infoTextArea.append("\n\nMatching started: " + getCurrentDate() + "\n");
 
-			outputTextArea.append("\nMatch number: " + totalMatches + "\n\n");
-			
-			controller = new StereoMatchingController(
-					leftImageFilePath,
-					rightImageFilePath,
-					outputTextArea);
-			
-			matchStartTime = System.currentTimeMillis();
-			
-			controller.start();
-			
-			boolean finished = false;
-			while (!finished)
+			outputTextArea.append("\nMatch number: " + totalMatches + "\n\n");		
+
+
+			runButton.setEnabled(false);
+			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+			progressBar.setIndeterminate(true);
+			task = new Task();
+			task.addPropertyChangeListener(new PropertyChangeListener()
 			{
-				if (controller.isAlive())
+				public void propertyChange(PropertyChangeEvent evt)
 				{
-					System.out.println("Thread not finished");
-					long delayMillis = 2000;
-					controller.join(delayMillis);
+					if ("progress".equals(evt.getPropertyName()))
+					{
+						progressBar.setValue((Integer)evt.getNewValue());
+					}
 				}
-				else
-				{
-					finished = true;
-					matchEndTime = System.currentTimeMillis();
-				}
-			}			
-
-			matchTotalTime = matchEndTime - matchStartTime;
-			totalTimeForMatches += matchTotalTime;
-			averageMatchTime = (totalTimeForMatches * 1.0) / totalMatches;
-
-			averageMatchTimeLabel.setText(String.format("%s %.2fs", "Average match time: ", averageMatchTime / 1000.0));
-			timeForLastMatchLabel.setText(String.format("%s %.2fs", "Time taken for last match: ", matchTotalTime / 1000.0));
-			
-			infoTextArea.append("Time to complete match: " + matchTotalTime / 1000.0 + "s\n\n");
-
-			infoTextArea.append(outputDelimiter + outputDelimiter + "\n\n");
+			});
+			task.execute();
 		}
 		catch (NullPointerException npx)
 		{			
 			JOptionPane.showMessageDialog(this, "You must specify two images to be matched",
 					"Error", JOptionPane.ERROR_MESSAGE,
 					errorIcon);
-		}
-		catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
@@ -646,7 +709,7 @@ public class StereoMatchingGUI extends JFrame
 
 					outputFileWriter = new FileWriter(outputFileName);
 					outputFileWriter.write(createReport());
-					
+
 					JOptionPane.showMessageDialog(this,
 							"Report saved to file: '" + outputFileName + "'",
 							"Report Saved", JOptionPane.INFORMATION_MESSAGE,
@@ -701,7 +764,7 @@ public class StereoMatchingGUI extends JFrame
 					File saveFile = fileSaveChooser.getSelectedFile();
 					outputFileWriter = new FileWriter(saveFile);
 					outputFileWriter.write(createReport());
-					
+
 					JOptionPane.showMessageDialog(this,
 							"Report saved to file: '" + outputFileName + "'",
 							"Report Saved", JOptionPane.INFORMATION_MESSAGE,
@@ -786,7 +849,7 @@ public class StereoMatchingGUI extends JFrame
 	{
 		//TODO complete help pages
 	}
-	
+
 	private void processShowStatusBar()
 	{
 		//TODO complete processShowStatusBar

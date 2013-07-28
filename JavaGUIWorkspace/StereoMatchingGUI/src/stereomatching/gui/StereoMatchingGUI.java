@@ -58,7 +58,8 @@ public class StereoMatchingGUI extends JFrame
 	// File Names and Paths
 	private String leftImageFileName, rightImageFileName;
 	private String leftImageFilePath, rightImageFilePath;
-	private String outputFileName = null;
+	private String outputImageFilePath = "/home/adam/Dropbox/VectorPascal/MastersProjectPrograms/JavaGUIWorkspace/diffImage.bmp";
+	private String outputReportFileName = null;
 
 	// Stereo Matching Controller
 	private StereoMatchingController controller;
@@ -101,9 +102,8 @@ public class StereoMatchingGUI extends JFrame
 		setTitle("Stereo Image Matcher v0.1");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();
-		setLocationRelativeTo(this);
-		setLocationByPlatform(true);
 		setSize(GUI_WIDTH, GUI_HEIGHT);
+		setLocationRelativeTo(null);
 		setVisible(true);
 	}
 
@@ -497,16 +497,14 @@ public class StereoMatchingGUI extends JFrame
 
 	private void addProgressBar()
 	{
-		progressBar = new JProgressBar(0, 100);
-		progressBar.setValue(0);
+		progressBar = new JProgressBar();
+		progressBar.setString("Executing...");
 		progressBar.setStringPainted(true);
 
 		progressBarFrame = new JFrame();
-		progressBarFrame.setUndecorated(true);
-		progressBarFrame.setLocationRelativeTo(this);
-		progressBarFrame.getContentPane();
-		progressBarFrame.pack();
 		progressBarFrame.setSize(200, 40);
+		progressBarFrame.setUndecorated(true);
+		progressBarFrame.setLocationRelativeTo(this.getContentPane());
 		progressBarFrame.add(progressBar);
 	}
 
@@ -533,18 +531,16 @@ public class StereoMatchingGUI extends JFrame
 		public Void doInBackground()
 		{
 			progressBarFrame.setVisible(true);
-			
+
 			matchStartTime = System.currentTimeMillis();
 
 			controller = new StereoMatchingController(
 					leftImageFilePath,
 					rightImageFilePath,
+					outputImageFilePath,
 					outputTextArea);
 
 			controller.start();
-			
-			int progress = 0;			
-			setProgress(0);
 
 			boolean finished = false;
 			while (!finished)
@@ -558,9 +554,6 @@ public class StereoMatchingGUI extends JFrame
 						controller.join(delayMillis);
 					}
 					catch (InterruptedException e) {e.printStackTrace();}
-
-					progress += 4;
-					setProgress(Math.min(progress, 100));
 				}
 				else
 				{
@@ -576,19 +569,16 @@ public class StereoMatchingGUI extends JFrame
 					infoTextArea.append("Time to complete match: " + matchTotalTime / 1000.0 + "s\n\n");
 				}
 			}	
-
 			return null;
 		}
-
 		@Override
 		public void done()
 		{
-			setProgress(100);
 			Toolkit.getDefaultToolkit().beep();
 			setCursor(null);
 			System.out.println("Finished execution!");
 			progressBarFrame.dispose();
-			
+
 			runButton.setEnabled(true);
 			openLeftImageButton.setEnabled(true);
 			openRightImageButton.setEnabled(true);
@@ -611,7 +601,7 @@ public class StereoMatchingGUI extends JFrame
 				throw new NullPointerException();
 
 			++totalMatches;
-			
+
 			infoTextArea.append("##### Match number: " + totalMatches + " #####\n\n");
 			infoTextArea.append("Matching the following images: " +
 					"\n\tLeft image: " + leftImageFileName +
@@ -639,7 +629,7 @@ public class StereoMatchingGUI extends JFrame
 				{
 					if ("progress".equals(evt.getPropertyName()))
 					{
-						progressBar.setValue((Integer)evt.getNewValue());
+						progressBar.setValue(progressBar.getValue() + 1);
 					}
 				}
 			});
@@ -707,7 +697,7 @@ public class StereoMatchingGUI extends JFrame
 		{
 			try
 			{
-				if (outputFileName == null)
+				if (outputReportFileName == null)
 				{
 					processSaveAs();
 				}
@@ -718,11 +708,11 @@ public class StereoMatchingGUI extends JFrame
 							notesTextArea.getText().equals(""))
 						throw new IllegalArgumentException();
 
-					outputFileWriter = new FileWriter(outputFileName);
+					outputFileWriter = new FileWriter(outputReportFileName);
 					outputFileWriter.write(createReport());
 
 					JOptionPane.showMessageDialog(this,
-							"Report saved to file: '" + outputFileName + "'",
+							"Report saved to file: '" + outputReportFileName + "'",
 							"Report Saved", JOptionPane.INFORMATION_MESSAGE,
 							infoIcon);
 				}
@@ -771,13 +761,13 @@ public class StereoMatchingGUI extends JFrame
 
 				if (returnValFileSave == JFileChooser.APPROVE_OPTION)
 				{
-					outputFileName = fileSaveChooser.getSelectedFile().getName();
+					outputReportFileName = fileSaveChooser.getSelectedFile().getName();
 					File saveFile = fileSaveChooser.getSelectedFile();
 					outputFileWriter = new FileWriter(saveFile);
 					outputFileWriter.write(createReport());
 
 					JOptionPane.showMessageDialog(this,
-							"Report saved to file: '" + outputFileName + "'",
+							"Report saved to file: '" + outputReportFileName + "'",
 							"Report Saved", JOptionPane.INFORMATION_MESSAGE,
 							infoIcon);
 				}

@@ -15,7 +15,7 @@ public class StereoMatchingController extends Thread
 {
 	private JTextArea outputTextArea;
 	
-	private String leftImageFileName, rightImageFileName;
+	private String leftImageFileName, rightImageFileName, outputImageFileName;
 	private String [] runVectorPascalCode;
 
 	/**
@@ -24,13 +24,17 @@ public class StereoMatchingController extends Thread
 	 * 
 	 * @param leftImage - file name of the left stereo image.
 	 * @param rightImage - file name of the right stereo image.
+	 * @param outputImage - file name of the output image.
+	 * @param output - GUI text area to display output.
 	 */
 	public StereoMatchingController(String leftImage,
 			String rightImage,
+			String outputImage,
 			JTextArea output)
 	{
 		leftImageFileName = leftImage;
 		rightImageFileName = rightImage;
+		outputImageFileName = outputImage;
 		outputTextArea = output;
 	}
 
@@ -47,19 +51,22 @@ public class StereoMatchingController extends Thread
 		{
 			String bashScriptLocation = "/home/adam/Dropbox/VectorPascal/MastersProjectPrograms/JavaGUIWorkspace/";
 
-			runVectorPascalCode = new String[3];
+			runVectorPascalCode = new String[4];
 			runVectorPascalCode[0] = bashScriptLocation + "run_vector_pascal_code";
 			runVectorPascalCode[1] = leftImageFileName;
 			runVectorPascalCode[2] = rightImageFileName;
+			runVectorPascalCode[3] = outputImageFileName;
 			
 			ProcessBuilder processBuilder = new ProcessBuilder(runVectorPascalCode);
 			Process process = processBuilder.start();
 			
-			StreamGobbler errorGobbler = new 
-					StreamGobbler(process.getErrorStream(), "ERROR", outputTextArea);            
+			StreamGobbler errorGobbler = new StreamGobbler(
+					process.getErrorStream(),
+					"ERROR", outputTextArea);            
 
-			StreamGobbler outputGobbler = new 
-					StreamGobbler(process.getInputStream(), ">", outputTextArea);
+			StreamGobbler outputGobbler = new StreamGobbler(
+					process.getInputStream(),
+					">", outputTextArea);
 
 			errorGobbler.start();
 			outputGobbler.start();

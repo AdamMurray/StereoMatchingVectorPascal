@@ -8,7 +8,6 @@ import java.text.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.filechooser.*;
 
 /**
  * Class that defines a GUI for handling user input.
@@ -35,7 +34,6 @@ public class StereoMatchingGUI extends JFrame
 	// GUI Components
 	private JButton runButton, openLeftImageButton, openRightImageButton;
 	private JButton clearButton, saveButton, saveAsButton, exitButton;
-	private JFileChooser leftImageChooser, rightImageChooser;
 	private JLabel leftImageFileNameLabel, rightImageFileNameLabel;
 	private JLabel timeForLastMatchLabel, averageMatchTimeLabel;
 	private JMenuBar menubar;
@@ -56,15 +54,10 @@ public class StereoMatchingGUI extends JFrame
 	private ImageIcon saveAsIcon = new ImageIcon("./gui_icons/save_as.png");
 
 	// File Names and Paths
-//	private String leftImageFileName, rightImageFileName;
-//	private String leftImageFilePath, rightImageFilePath;
-//	private String outputImageFilePath = "/home/adam/Dropbox/VectorPascal/MastersProjectPrograms/JavaGUIWorkspace/diffImage.bmp";
+	//	private String leftImageFileName, rightImageFileName;
+	//	private String leftImageFilePath, rightImageFilePath;
+	private String outputImageFilePath = "/home/adam/Dropbox/VectorPascal/MastersProjectPrograms/JavaGUIWorkspace/diffImage.bmp";
 	private String outputReportFileName = null;
-
-	
-
-	// File Name Filter for Choosing Files
-	private FileNameExtensionFilter fileNameFilter = new FileNameExtensionFilter(".bmp Images", "bmp");
 
 	// Variables for Match Calculations
 	private long totalTimeForMatches;
@@ -77,10 +70,11 @@ public class StereoMatchingGUI extends JFrame
 
 	private Task task;
 	private JFrame progressBarFrame;
-	
+
 	// Stereo Matching Controller
 	private StereoMatchingController controller;
 	private StereoMatchingModel model = new StereoMatchingModel(); // could initialise this elsewhere, e.g. in the constructor
+	private Controller matchController = new Controller(model);
 
 	/**
 	 * Creates a new StereoMatchingGUI object,
@@ -532,18 +526,22 @@ public class StereoMatchingGUI extends JFrame
 		@Override
 		public Void doInBackground()
 		{
+			setEnabled(false);
 			progressBarFrame.setVisible(true);
 
+			//FIXME: Need to add a method to get the 
+			// outputImageFilePath from the user via
+			// a JFileChooser
 			controller = new StereoMatchingController(
 					model.getLeftImageFilePath(),
 					model.getRightImageFilePath(),
-					model.getOutputImageFilePath(),
+					outputImageFilePath,
 					outputTextArea);
 
 			controller.start();
 
 			long matchStartTime = System.currentTimeMillis();
-			
+
 			boolean finished = false;
 			while (!finished)
 			{
@@ -581,6 +579,7 @@ public class StereoMatchingGUI extends JFrame
 			System.out.println("Finished execution!");
 			progressBarFrame.dispose();
 
+			setEnabled(true);
 			runButton.setEnabled(true);
 			openLeftImageButton.setEnabled(true);
 			openRightImageButton.setEnabled(true);
@@ -652,18 +651,9 @@ public class StereoMatchingGUI extends JFrame
 	 */
 	private void processLeftImageSelect()
 	{
-		leftImageChooser = new JFileChooser();
-		leftImageChooser.setCurrentDirectory(new File("./"));
-		leftImageChooser.setFileFilter(fileNameFilter);
-		leftImageChooser.setDialogTitle("Select Left Stereo Image");
-		int returnValLeft = leftImageChooser.showOpenDialog(this);
+		matchController.processLeftImageSelect();
+		leftImageFileNameLabel.setText("Left image file selected: " + model.getLeftImageFileName());
 
-		if (returnValLeft == JFileChooser.APPROVE_OPTION)
-		{
-			model.setLeftImageFilePath(leftImageChooser.getSelectedFile().getAbsolutePath());
-			model.setLeftImageFileName(leftImageChooser.getSelectedFile().getName());
-			leftImageFileNameLabel.setText("Left image file selected: " + model.getLeftImageFileName());
-		}
 	}
 
 	/**
@@ -672,18 +662,9 @@ public class StereoMatchingGUI extends JFrame
 	 */
 	private void processRightImageSelect()
 	{
-		rightImageChooser = new JFileChooser();
-		rightImageChooser.setCurrentDirectory(new File("./"));
-		rightImageChooser.setFileFilter(fileNameFilter);
-		rightImageChooser.setDialogTitle("Select Right Stereo Image");
-		int returnValRight = rightImageChooser.showOpenDialog(this);
+		matchController.processRightImageSelect();
+		rightImageFileNameLabel.setText("Right image file selected: " + model.getRightImageFileName());
 
-		if (returnValRight == JFileChooser.APPROVE_OPTION)
-		{
-			model.setRightImageFilePath(rightImageChooser.getSelectedFile().getAbsolutePath());
-			model.setRightImageFileName(rightImageChooser.getSelectedFile().getName());
-			rightImageFileNameLabel.setText("Right image file selected: " + model.getRightImageFileName());
-		}
 	}
 
 	/**

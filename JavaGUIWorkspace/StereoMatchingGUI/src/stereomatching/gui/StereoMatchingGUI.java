@@ -56,19 +56,17 @@ public class StereoMatchingGUI extends JFrame
 	private ImageIcon saveAsIcon = new ImageIcon("./gui_icons/save_as.png");
 
 	// File Names and Paths
-	private String leftImageFileName, rightImageFileName;
-	private String leftImageFilePath, rightImageFilePath;
-	private String outputImageFilePath = "/home/adam/Dropbox/VectorPascal/MastersProjectPrograms/JavaGUIWorkspace/diffImage.bmp";
+//	private String leftImageFileName, rightImageFileName;
+//	private String leftImageFilePath, rightImageFilePath;
+//	private String outputImageFilePath = "/home/adam/Dropbox/VectorPascal/MastersProjectPrograms/JavaGUIWorkspace/diffImage.bmp";
 	private String outputReportFileName = null;
 
-	// Stereo Matching Controller
-	private StereoMatchingController controller;
+	
 
 	// File Name Filter for Choosing Files
 	private FileNameExtensionFilter fileNameFilter = new FileNameExtensionFilter(".bmp Images", "bmp");
 
 	// Variables for Match Calculations
-	private long matchStartTime, matchEndTime, matchTotalTime;
 	private long totalTimeForMatches;
 	private double averageMatchTime;
 	private int totalMatches = 0;
@@ -79,6 +77,10 @@ public class StereoMatchingGUI extends JFrame
 
 	private Task task;
 	private JFrame progressBarFrame;
+	
+	// Stereo Matching Controller
+	private StereoMatchingController controller;
+	private StereoMatchingModel model = new StereoMatchingModel(); // could initialise this elsewhere, e.g. in the constructor
 
 	/**
 	 * Creates a new StereoMatchingGUI object,
@@ -532,16 +534,16 @@ public class StereoMatchingGUI extends JFrame
 		{
 			progressBarFrame.setVisible(true);
 
-			matchStartTime = System.currentTimeMillis();
-
 			controller = new StereoMatchingController(
-					leftImageFilePath,
-					rightImageFilePath,
-					outputImageFilePath,
+					model.getLeftImageFilePath(),
+					model.getRightImageFilePath(),
+					model.getOutputImageFilePath(),
 					outputTextArea);
 
 			controller.start();
 
+			long matchStartTime = System.currentTimeMillis();
+			
 			boolean finished = false;
 			while (!finished)
 			{
@@ -558,15 +560,15 @@ public class StereoMatchingGUI extends JFrame
 				else
 				{
 					finished = true;
-					matchEndTime = System.currentTimeMillis();
-					matchTotalTime = matchEndTime - matchStartTime;
-					totalTimeForMatches += matchTotalTime;
+					long matchEndTime = System.currentTimeMillis();
+					model.setTimeForMatch(matchEndTime - matchStartTime);
+					totalTimeForMatches += model.getTimeForMatch();
 					averageMatchTime = (totalTimeForMatches * 1.0) / totalMatches;
 
 					averageMatchTimeLabel.setText(String.format("%s %.2fs", "Average match time: ", averageMatchTime / 1000.0));
-					timeForLastMatchLabel.setText(String.format("%s %.2fs", "Time taken for last match: ", matchTotalTime / 1000.0));
+					timeForLastMatchLabel.setText(String.format("%s %.2fs", "Time taken for last match: ", model.getTimeForMatch() / 1000.0));
 
-					infoTextArea.append("Time to complete match: " + matchTotalTime / 1000.0 + "s\n\n");
+					infoTextArea.append("Time to complete match: " + model.getTimeForMatch() / 1000.0 + "s\n\n");
 				}
 			}	
 			return null;
@@ -597,15 +599,16 @@ public class StereoMatchingGUI extends JFrame
 	{
 		try
 		{
-			if (leftImageFileName.equals(null) || rightImageFileName.equals(null))
+			if (model.getLeftImageFileName().equals(null)
+					|| model.getRightImageFileName().equals(null))
 				throw new NullPointerException();
 
 			++totalMatches;
 
 			infoTextArea.append("##### Match number: " + totalMatches + " #####\n\n");
 			infoTextArea.append("Matching the following images: " +
-					"\n\tLeft image: " + leftImageFileName +
-					"\n\tRight image: " + rightImageFileName);
+					"\n\tLeft image: " + model.getLeftImageFileName() +
+					"\n\tRight image: " + model.getRightImageFileName());
 
 			infoTextArea.append("\n\nMatching started: " + getCurrentDate() + "\n");
 
@@ -657,9 +660,9 @@ public class StereoMatchingGUI extends JFrame
 
 		if (returnValLeft == JFileChooser.APPROVE_OPTION)
 		{
-			leftImageFilePath = leftImageChooser.getSelectedFile().getAbsolutePath();
-			leftImageFileName = leftImageChooser.getSelectedFile().getName();
-			leftImageFileNameLabel.setText("Left image file selected: " + leftImageFileName);
+			model.setLeftImageFilePath(leftImageChooser.getSelectedFile().getAbsolutePath());
+			model.setLeftImageFileName(leftImageChooser.getSelectedFile().getName());
+			leftImageFileNameLabel.setText("Left image file selected: " + model.getLeftImageFileName());
 		}
 	}
 
@@ -677,9 +680,9 @@ public class StereoMatchingGUI extends JFrame
 
 		if (returnValRight == JFileChooser.APPROVE_OPTION)
 		{
-			rightImageFilePath = rightImageChooser.getSelectedFile().getAbsolutePath();
-			rightImageFileName = rightImageChooser.getSelectedFile().getName();
-			rightImageFileNameLabel.setText("Right image file selected: " + rightImageFileName);
+			model.setRightImageFilePath(rightImageChooser.getSelectedFile().getAbsolutePath());
+			model.setRightImageFileName(rightImageChooser.getSelectedFile().getName());
+			rightImageFileNameLabel.setText("Right image file selected: " + model.getRightImageFileName());
 		}
 	}
 

@@ -2,10 +2,13 @@ package stereomatching.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.beans.*;
 import java.io.*;
 import java.text.*;
 import java.util.*;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -54,9 +57,6 @@ public class StereoMatchingGUI extends JFrame
 	private ImageIcon saveAsIcon = new ImageIcon("./gui_icons/save_as.png");
 
 	// File Names and Paths
-	//	private String leftImageFileName, rightImageFileName;
-	//	private String leftImageFilePath, rightImageFilePath;
-	private String outputImageFilePath = "/home/adam/Dropbox/VectorPascal/MastersProjectPrograms/JavaGUIWorkspace/diffImage.bmp";
 	private String outputReportFileName = null;
 
 	// Variables for Match Calculations
@@ -535,7 +535,7 @@ public class StereoMatchingGUI extends JFrame
 			controller = new StereoMatchingController(
 					model.getLeftImageFilePath(),
 					model.getRightImageFilePath(),
-					outputImageFilePath,
+					model.getOutputImageFilePath(),
 					outputTextArea);
 
 			controller.start();
@@ -587,6 +587,8 @@ public class StereoMatchingGUI extends JFrame
 			saveButton.setEnabled(true);
 			saveAsButton.setEnabled(true);
 			exitButton.setEnabled(true);
+			
+			showOutputImage();
 		}
 	}
 
@@ -601,6 +603,8 @@ public class StereoMatchingGUI extends JFrame
 			if (model.getLeftImageFileName().equals(null)
 					|| model.getRightImageFileName().equals(null))
 				throw new NullPointerException();
+
+			processOutputImageSelect();
 
 			++totalMatches;
 
@@ -645,6 +649,46 @@ public class StereoMatchingGUI extends JFrame
 		}
 	}
 
+	private void showOutputImage()
+	{
+		BufferedImage outputImage = null;
+		try
+		{
+			outputImage = ImageIO.read(new File(model.getOutputImageFilePath()));
+		}
+		catch (IOException iox)
+		{
+			JOptionPane.showMessageDialog(this, "Image cannot be found or does not exist.",
+					"Image I/O Error", JOptionPane.ERROR_MESSAGE,
+					errorIcon);
+		}
+
+		int outputImageWidth = outputImage.getWidth();
+		int outputImageHeight = outputImage.getHeight();
+
+		int resizedWidth = outputImageWidth / 10;
+		int resizedHeight = outputImageHeight / 10;
+
+		Image outputImageToDisplay = outputImage.getScaledInstance(resizedWidth, resizedHeight, Image.SCALE_AREA_AVERAGING);
+
+		ImageIcon outputImageIcon = new ImageIcon(outputImageToDisplay);
+
+		JFrame outputImageFrame = new JFrame();
+		outputImageFrame.setLayout(new BorderLayout());
+
+		JPanel outputImagePanel = (JPanel)outputImageFrame.getContentPane();
+
+		JLabel outputImageLabel = new JLabel();		
+		outputImageLabel.setIcon(outputImageIcon);
+
+		outputImagePanel.add(outputImageLabel);
+
+		outputImageFrame.setTitle("Output Image");
+		outputImageFrame.setLocationRelativeTo(null);
+		outputImageFrame.pack();  
+		outputImageFrame.setVisible(true);  
+	}
+
 	/**
 	 * Handles user selection of the left
 	 * stereo image.
@@ -653,7 +697,6 @@ public class StereoMatchingGUI extends JFrame
 	{
 		matchController.processLeftImageSelect();
 		leftImageFileNameLabel.setText("Left image file selected: " + model.getLeftImageFileName());
-
 	}
 
 	/**
@@ -664,7 +707,14 @@ public class StereoMatchingGUI extends JFrame
 	{
 		matchController.processRightImageSelect();
 		rightImageFileNameLabel.setText("Right image file selected: " + model.getRightImageFileName());
+	}
 
+	/**
+	 * Handles selection of the output image.
+	 */
+	private void processOutputImageSelect()
+	{
+		matchController.processOutputImageSelect();
 	}
 
 	/**

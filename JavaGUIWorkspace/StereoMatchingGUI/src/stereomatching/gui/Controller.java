@@ -64,4 +64,21 @@ public class Controller
 			workingDirectory = rightImageChooser.getCurrentDirectory();
 		}
 	}
+	
+	public void processOutputImageSelect()
+	{
+		JFileChooser outputImageChooser = new JFileChooser();
+		outputImageChooser.setCurrentDirectory(workingDirectory);
+		outputImageChooser.setFileFilter(bmpFileFilter);
+		outputImageChooser.setDialogTitle("Save Output Image");
+		int returnVal = outputImageChooser.showSaveDialog(null);
+
+		if (returnVal == JFileChooser.APPROVE_OPTION)
+		{
+			model.setOutputImageFilePath(
+					outputImageChooser.getSelectedFile().getAbsolutePath());
+			model.setOutputImageFileName(
+					outputImageChooser.getSelectedFile().getName());
+		}
+	}
 }

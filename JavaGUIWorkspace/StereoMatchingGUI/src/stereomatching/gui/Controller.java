@@ -80,5 +80,7 @@ public class Controller
 			model.setOutputImageFileName(
 					outputImageChooser.getSelectedFile().getName());
 		}
+		else
+			throw new IllegalArgumentException();
 	}
 }

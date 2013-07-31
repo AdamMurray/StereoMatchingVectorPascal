@@ -215,8 +215,20 @@ public class StereoMatchingGUI extends JFrame
 		// section of the menu
 		JMenu view = new JMenu("View");
 
+		JMenuItem showOutputImageItem = new JMenuItem("Show Previous Output Image");
+		showOutputImageItem.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent event)
+			{
+				showOutputImage();
+			}
+		});
+		view.add(showOutputImageItem);
+		
+		view.addSeparator();
+		
 		JMenuItem showStatusBarItem = new JMenuItem("Show Status Bar");
-		processClearOutputItem.addActionListener(new ActionListener()
+		showStatusBarItem.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent event)
 			{
@@ -587,7 +599,7 @@ public class StereoMatchingGUI extends JFrame
 			saveButton.setEnabled(true);
 			saveAsButton.setEnabled(true);
 			exitButton.setEnabled(true);
-			
+
 			showOutputImage();
 		}
 	}
@@ -647,46 +659,69 @@ public class StereoMatchingGUI extends JFrame
 					"Error", JOptionPane.ERROR_MESSAGE,
 					errorIcon);
 		}
+		catch (IllegalArgumentException iax)
+		{
+			JOptionPane.showMessageDialog(this, "You must specify an output file name",
+					"Error", JOptionPane.ERROR_MESSAGE,
+					errorIcon);
+		}
+	}
+
+	private boolean isPreviousOutputImage()
+	{
+		return (model.getOutputImageFileName() == null) ? false : true;
 	}
 
 	private void showOutputImage()
 	{
-		BufferedImage outputImage = null;
-		try
+		if (!isPreviousOutputImage())
 		{
-			outputImage = ImageIO.read(new File(model.getOutputImageFilePath()));
+			JOptionPane.showMessageDialog(this, "No previous image to be displayed",
+					"Error", JOptionPane.INFORMATION_MESSAGE,
+					attentionIcon);
 		}
-		catch (IOException iox)
+		else
 		{
-			JOptionPane.showMessageDialog(this, "Image cannot be found or does not exist.",
-					"Image I/O Error", JOptionPane.ERROR_MESSAGE,
-					errorIcon);
+			BufferedImage outputImage = null;
+			try
+			{
+				outputImage = ImageIO.read(new File(model.getOutputImageFilePath()));
+			}
+			catch (IOException iox)
+			{
+				JOptionPane.showMessageDialog(this, "Image cannot be found or does not exist.",
+						"Image I/O Error", JOptionPane.ERROR_MESSAGE,
+						errorIcon);
+			}
+
+			int outputImageWidth = outputImage.getWidth();
+			int outputImageHeight = outputImage.getHeight();
+
+			int resizedWidth = outputImageWidth / 10;
+			int resizedHeight = outputImageHeight / 10;
+
+			Image outputImageToDisplay =
+					outputImage.getScaledInstance(resizedWidth, resizedHeight, Image.SCALE_AREA_AVERAGING);
+
+			ImageIcon outputImageIcon = new ImageIcon(outputImageToDisplay);
+
+			JFrame outputImageFrame = new JFrame();
+			outputImageFrame.setLayout(new BorderLayout());
+
+			JPanel outputImagePanel = (JPanel)outputImageFrame.getContentPane();
+
+			JLabel outputImageLabel = new JLabel();		
+			outputImageLabel.setIcon(outputImageIcon);
+
+			outputImagePanel.add(outputImageLabel);
+
+			outputImageFrame.setTitle("Result of match: " +
+					model.getRightImageFileName() + " & " +
+					model.getLeftImageFileName());
+			outputImageFrame.setLocationRelativeTo(null);
+			outputImageFrame.pack();  
+			outputImageFrame.setVisible(true);
 		}
-
-		int outputImageWidth = outputImage.getWidth();
-		int outputImageHeight = outputImage.getHeight();
-
-		int resizedWidth = outputImageWidth / 10;
-		int resizedHeight = outputImageHeight / 10;
-
-		Image outputImageToDisplay = outputImage.getScaledInstance(resizedWidth, resizedHeight, Image.SCALE_AREA_AVERAGING);
-
-		ImageIcon outputImageIcon = new ImageIcon(outputImageToDisplay);
-
-		JFrame outputImageFrame = new JFrame();
-		outputImageFrame.setLayout(new BorderLayout());
-
-		JPanel outputImagePanel = (JPanel)outputImageFrame.getContentPane();
-
-		JLabel outputImageLabel = new JLabel();		
-		outputImageLabel.setIcon(outputImageIcon);
-
-		outputImagePanel.add(outputImageLabel);
-
-		outputImageFrame.setTitle("Output Image");
-		outputImageFrame.setLocationRelativeTo(null);
-		outputImageFrame.pack();  
-		outputImageFrame.setVisible(true);  
 	}
 
 	/**
